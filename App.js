@@ -5,16 +5,20 @@ import { StyleSheet, Text, View } from "react-native";
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Sentinel Smart Door</Text>
+      <Text style={styles.text}>Henrique Gay Alert</Text>
+      <Text style={styles.text}>Henrique is Gay and Getting Closer</Text>
       <StatusBar style="auto" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  text: {
+    color: "white",
+  },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "blue",
     alignItems: "center",
     justifyContent: "center",
   },
