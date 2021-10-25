@@ -1,18 +1,9 @@
 import React, { useState } from "react";
 import { styles } from "../Styles";
 import logo from "../assets/logo.png";
-import { getDatabase, ref, onValue } from 'firebase/database';
-
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import "firebase/auth";
+import firebase from "firebase/app";
 import "firebase/database";
-//import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDp3DdsqNfYJeCXIveh-7dDvnJhmudgdeE",
   authDomain: "sentinel-a6249.firebaseapp.com",
@@ -24,10 +15,9 @@ const firebaseConfig = {
   measurementId: "G-5WBYZYXC4J"
 };
 
-// Initialize Firebase
-const db = getDatabase(app);
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+firebase.initializeApp(firebaseConfig);
+var database = firebase.database();
+
 
 import {
   Text,
@@ -43,13 +33,12 @@ function Login({ navigation }) {
   const [user, setUsername] = useState("");
   const movePage = () => {
     username = user;
+    storeUser(username);
     navigation.navigate("Home");
   };
-  const storeUser = (userName) => {
-    //const db = getDatabase();
-    const reference = ref(db, 'users/' + userName);
-    set(ref(db, 'users/' + username), {
-      password: "password",
+  const storeUser = (username) => {
+    database.ref('users/' + username).set({
+      password: "password"
     });
   };
 
@@ -75,7 +64,7 @@ function Login({ navigation }) {
           onChangeText={(user) => setUsername(user)}
         />
         <TextInput style={styles.input} placeholder="Password" />
-        <TouchableOpacity style={styles.button} onPress={movePage, storeUser(username)}>
+        <TouchableOpacity style={styles.button} onPress={movePage}>
           <Text
             style={{
               color: "white",
