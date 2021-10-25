@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   },
   lockButton: {
     backgroundColor: "#3EB489",
-    width: "40%",
+    width: "50%",
     height: "40%",
     alignItems: "center",
     justifyContent: "center",

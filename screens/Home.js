@@ -1,15 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { styles } from "../Styles";
 import { username } from "../screens/Login";
 function Home(props) {
+  const [lockstate, setLockstate] = useState(false);
+  const changeLockState = () => {
+    if (lockstate == false) {
+      setLockstate(true);
+      setLockStateText("unlock");
+    }
+    if (lockstate == true) {
+      setLockstate(false);
+      setLockStateText("lock");
+    }
+  };
+  const [lockstateText, setLockStateText] = useState("lock");
   return (
     <View style={styles.back}>
       <View style={styles.centeredcontainer}>
         <Text style={styles.text}>Welcome Home, {username}</Text>
       </View>
       <View style={styles.middlecontainer}>
-        <TouchableOpacity style={styles.lockButton}>
+        <TouchableOpacity style={styles.lockButton} onPress={changeLockState}>
           <Text
             style={{
               color: "white",
@@ -18,7 +30,7 @@ function Home(props) {
               fontFamily: "AppleSDGothicNeo-Bold",
             }}
           >
-            Lock
+            {lockstateText}
           </Text>
         </TouchableOpacity>
       </View>
