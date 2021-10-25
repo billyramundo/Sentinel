@@ -11,21 +11,35 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
   },
+  centeredcontainer: {
+    flex: 1,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   back: {
     flex: 1,
-    backgroundColor: "#5E9CF7",
+    backgroundColor: "white",
   },
   button: {
-    backgroundColor: "gray",
+    backgroundColor: "#3EB489",
     width: "50%",
     height: "20%",
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
   },
+  lockButton: {
+    backgroundColor: "#3EB489",
+    width: "40%",
+    height: "40%",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 30,
+  },
   text: {
-    color: "white",
-    fontFamily: "Arial",
+    color: "#3EB489",
+    fontFamily: "AppleSDGothicNeo-Bold",
     fontSize: 30,
     textTransform: "uppercase",
   },
@@ -35,6 +49,8 @@ const styles = StyleSheet.create({
     height: "15%",
     borderRadius: 8,
     marginBottom: 5,
+    borderColor: "#3EB489",
+    borderWidth: 3,
   },
 });
 

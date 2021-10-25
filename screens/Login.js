@@ -20,7 +20,16 @@ function Login({ navigation }) {
         />
         <TextInput style={styles.input} placeholder="Password" />
         <TouchableOpacity style={styles.button} onPress={movePage}>
-          <Text style={styles.text}>Login</Text>
+          <Text
+            style={{
+              color: "white",
+              fontSize: 30,
+              textTransform: "uppercase",
+              fontFamily: "AppleSDGothicNeo-Bold",
+            }}
+          >
+            Login
+          </Text>
         </TouchableOpacity>
       </View>
       <View style={styles.container}></View>
