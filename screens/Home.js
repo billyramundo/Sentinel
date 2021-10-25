@@ -1,20 +1,21 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
 import { styles } from "../Styles";
 import { username } from "../screens/Login";
+import logo from "../assets/logo.png";
 function Home(props) {
   const [lockstate, setLockstate] = useState(false);
   const changeLockState = () => {
     if (lockstate == false) {
       setLockstate(true);
-      setLockStateText("unlock");
+      setLockStateText("lock");
     }
     if (lockstate == true) {
       setLockstate(false);
-      setLockStateText("lock");
+      setLockStateText("unlock");
     }
   };
-  const [lockstateText, setLockStateText] = useState("lock");
+  const [lockstateText, setLockStateText] = useState("unlock");
   return (
     <View style={styles.back}>
       <View style={styles.centeredcontainer}>
@@ -34,7 +35,9 @@ function Home(props) {
           </Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.container}></View>
+      <View style={styles.middlecontainer}>
+        <Image source={logo} style={{ width: 200, height: 200 }}></Image>
+      </View>
     </View>
   );
 }
