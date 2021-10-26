@@ -14,7 +14,6 @@ import axios from "axios";
 
 function Home(props) {
   const [lockstate, setLockstate] = useState(false);
-  const username = "username";
   const password = "password";
   const changeLockState = () => {
     if (lockstate == false) {

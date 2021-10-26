@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
     fontFamily: "AppleSDGothicNeo-Bold",
     fontSize: 30,
     textTransform: "uppercase",
+
   },
   input: {
     backgroundColor: "white",
