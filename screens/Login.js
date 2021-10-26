@@ -29,16 +29,19 @@ import {
 } from "react-native";
 
 let username = "";
+let password = "";
 function Login({ navigation }) {
   const [user, setUsername] = useState("");
+  const [pass, setPassword] = useState("");
   const movePage = () => {
     username = user;
-    storeUser(username);
+    password = pass;
+    storeUser(username, password);
     navigation.navigate("Home");
   };
-  const storeUser = (username) => {
+  const storeUser = (username, password) => {
     database.ref('users/' + username).set({
-      password: "password"
+      password: password
     });
   };
 
@@ -63,7 +66,10 @@ function Login({ navigation }) {
           placeholder="Username"
           onChangeText={(user) => setUsername(user)}
         />
-        <TextInput style={styles.input} placeholder="Password" />
+        <TextInput 
+          style={styles.input} 
+          placeholder="Password" 
+          onChangeText={(pass) => setPassword(pass)} />
         <TouchableOpacity style={styles.button} onPress={movePage}>
           <Text
             style={{
