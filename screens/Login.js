@@ -40,7 +40,8 @@ function Login({ navigation }) {
   };
   const storeUser = (username, password) => {
     database.ref('users/' + username).set({
-      password: password
+      password: password,
+      door: "door_id"
     });
   };
 
