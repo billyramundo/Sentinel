@@ -16,8 +16,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-var database = firebase.database();
-
+const database = firebase.database();
 
 import {
   Text,
@@ -92,3 +91,4 @@ function Login({ navigation }) {
 
 export default Login;
 export { username };
+export { database };

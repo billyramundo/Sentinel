@@ -11,14 +11,30 @@ import { styles } from "../Styles";
 import { username } from "../screens/Login";
 import logo from "../assets/logo.png";
 import axios from "axios";
+import {database} from "../screens/Login";
 
 function Home(props) {
+  const getDate = () => {
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    return date;
+  };
+  const getTime = () => {
+    var today = new Date();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    return time;
+  };
   const [lockstate, setLockstate] = useState(false);
   const password = "password";
   const changeLockState = () => {
     if (lockstate == false) {
       setLockstate(true);
       setLockStateText("lock");
+      var date = getDate();
+      database.ref('users/' + username + '/entrances/' + date ).set({
+        door: "door code",
+        time: getTime()
+      });
       axios
         .post("https://p4qcydmk3c.tunnel.kundu.io/command/lock", {
           username: username,
