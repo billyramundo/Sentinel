@@ -66,9 +66,9 @@ function Login({ navigation }) {
           placeholder="Username"
           onChangeText={(user) => setUsername(user)}
         />
-        <TextInput 
-          style={styles.input} 
-          placeholder="Password" 
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
           onChangeText={(pass) => setPassword(pass)} />
         <TouchableOpacity style={styles.button} onPress={movePage}>
           <Text

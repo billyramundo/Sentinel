@@ -12,9 +12,12 @@ import { username } from "../screens/Login";
 import logo from "../assets/logo.png";
 import axios from "axios";
 
-function Home(props) {
+function Home({ navigation }) {
   const [lockstate, setLockstate] = useState(false);
   const password = "password";
+  const movePage = () => {
+    navigation.navigate("Friends");
+  }
   const changeLockState = () => {
     if (lockstate == false) {
       setLockstate(true);
@@ -58,6 +61,20 @@ function Home(props) {
             }}
           >
             {lockstateText}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.middlecontainer}>
+        <TouchableOpacity style={styles.button} onPress={movePage}>
+          <Text
+            style={{
+              color: "white",
+              fontSize: 25,
+              textTransform: "uppercase",
+              fontFamily: "AppleSDGothicNeo-Bold",
+            }}
+          >
+            Find Friends
           </Text>
         </TouchableOpacity>
       </View>
