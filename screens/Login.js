@@ -69,7 +69,8 @@ function Login({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Password"
-          onChangeText={(pass) => setPassword(pass)} />
+          onChangeText={(pass) => setPassword(pass)}
+          secureTextEntry={true} />
         <TouchableOpacity style={styles.button} onPress={movePage}>
           <Text
             style={{

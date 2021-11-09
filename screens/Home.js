@@ -63,8 +63,6 @@ function Home({ navigation }) {
             {lockstateText}
           </Text>
         </TouchableOpacity>
-      </View>
-      <View style={styles.middlecontainer}>
         <TouchableOpacity style={styles.button} onPress={movePage}>
           <Text
             style={{

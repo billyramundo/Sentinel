@@ -1,19 +1,22 @@
 import React, { useState } from "react";
 import { styles } from "../Styles";
+import SearchField from "react-search-field";
 import {
     View,
-    TextInput
+    TextInput,
 } from "react-native";
 
 function Friends({ navigation }) {
 
     return (
         <View style={styles.back}>
-            <View style={styles.middlecontainer}>
-                <TextInput
-                    style={styles.input}
+            <View style={styles.centeredcontainer}>
+                <SearchField
                     placeholder="Search for friends" />
             </View>
+            <View style={styles.middlecontainer}></View>
+            <View style={styles.middlecontainer}></View>
+            <View style={styles.middlecontainer}></View>
         </View>
     );
 }
