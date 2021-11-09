@@ -3,6 +3,7 @@ import { styles } from "../Styles";
 import logo from "../assets/logo.png";
 import firebase from "firebase/app";
 import "firebase/database";
+import "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDp3DdsqNfYJeCXIveh-7dDvnJhmudgdeE",
@@ -12,12 +13,11 @@ const firebaseConfig = {
   storageBucket: "sentinel-a6249.appspot.com",
   messagingSenderId: "1069922297779",
   appId: "1:1069922297779:web:2f883ac3957053cb80cdc6",
-  measurementId: "G-5WBYZYXC4J"
+  measurementId: "G-5WBYZYXC4J",
 };
 
-firebase.initializeApp(firebaseConfig);
-var database = firebase.database();
-
+const firebaseApp = firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
 import {
   Text,
@@ -26,22 +26,46 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
+  Alert,
 } from "react-native";
 
 let username = "";
+let email = "";
 let password = "";
 function Login({ navigation }) {
   const [user, setUsername] = useState("");
+  const [em, setEmail] = useState("");
   const [pass, setPassword] = useState("");
   const movePage = () => {
-    username = user;
-    password = pass;
-    storeUser(username, password);
-    navigation.navigate("Home");
+    if (em.length == 0 || pass.length == 0) {
+      Alert.alert("Please enter a username and password.");
+    } else if (pass.length < 6) {
+      Alert.alert("Password must be at least 6 characters long");
+    } else {
+      username = user;
+      email = em;
+      password = pass;
+      storeUser(email, password);
+      navigation.navigate("Home");
+    }
   };
-  const storeUser = (username, password) => {
-    database.ref('users/' + username).set({
-      password: password
+  const storeUser = (email, password) => {
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(() => {
+      console.log('User account created & signed in!');
+      database.ref('users/' + username).set({
+        uid: firebase.auth().currentUser.uid,
+        door: "door_id"
+      });
+    })
+    .catch(error => {
+      if (error.code === 'auth/email-already-in-use') {
+        console.log('That email address is already in use!');
+      }
+      if (error.code === 'auth/invalid-email') {
+        console.log('That email address is invalid!');
+      }
+      console.error(error);
     });
   };
 
@@ -61,15 +85,22 @@ function Login({ navigation }) {
         </Text>
       </View>
       <View style={styles.middlecontainer}>
-        <TextInput
+      <TextInput
           style={styles.input}
           placeholder="Username"
           onChangeText={(user) => setUsername(user)}
         />
-        <TextInput 
-          style={styles.input} 
-          placeholder="Password" 
-          onChangeText={(pass) => setPassword(pass)} />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          onChangeText={(em) => setEmail(em)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          onChangeText={(pass) => setPassword(pass)}
+          secureTextEntry={true}
+        />
         <TouchableOpacity style={styles.button} onPress={movePage}>
           <Text
             style={{
@@ -92,3 +123,5 @@ function Login({ navigation }) {
 
 export default Login;
 export { username };
+export { database };
+export { firebaseApp };
