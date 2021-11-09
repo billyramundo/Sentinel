@@ -13,7 +13,7 @@ const firebaseConfig = {
   storageBucket: "sentinel-a6249.appspot.com",
   messagingSenderId: "1069922297779",
   appId: "1:1069922297779:web:2f883ac3957053cb80cdc6",
-  measurementId: "G-5WBYZYXC4J"
+  measurementId: "G-5WBYZYXC4J",
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -26,6 +26,7 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
+  Alert,
 } from "react-native";
 
 let username = "";
@@ -34,25 +35,33 @@ function Login({ navigation }) {
   const [user, setUsername] = useState("");
   const [pass, setPassword] = useState("");
   const movePage = () => {
-    username = user;
-    password = pass;
-    storeUser(username, password);
-    navigation.navigate("Home");
+    if (user.length == 0 || pass.length == 0) {
+      Alert.alert("Please enter a username and password.");
+    } else if (pass.length < 6) {
+      Alert.alert("Password must be at least 6 characters long");
+    } else {
+      username = user;
+      password = pass;
+      storeUser(username, password);
+      navigation.navigate("Home");
+    }
   };
   const storeUser = (username, password) => {
-    firebase.auth().createUserWithEmailAndPassword(username, password)
-    .then(() => {
-      console.log('User account created & signed in!');
-    })
-    .catch(error => {
-      if (error.code === 'auth/email-already-in-use') {
-        console.log('That email address is already in use!');
-      }
-      if (error.code === 'auth/invalid-email') {
-        console.log('That email address is invalid!');
-      }
-      console.error(error);
-    });
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(username, password)
+      .then(() => {
+        console.log("User account created & signed in!");
+      })
+      .catch((error) => {
+        if (error.code === "auth/email-already-in-use") {
+          console.log("That email address is already in use!");
+        }
+        if (error.code === "auth/invalid-email") {
+          console.log("That email address is invalid!");
+        }
+        console.error(error);
+      });
   };
 
   return (
@@ -80,7 +89,8 @@ function Login({ navigation }) {
           style={styles.input}
           placeholder="Password"
           onChangeText={(pass) => setPassword(pass)}
-          secureTextEntry={true} />
+          secureTextEntry={true}
+        />
         <TouchableOpacity style={styles.button} onPress={movePage}>
           <Text
             style={{
