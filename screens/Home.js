@@ -39,7 +39,7 @@ function Home({ navigation }) {
       var date = getDate();
       const userID = firebase.auth().currentUser.uid;
       database.ref('users/' + userID + '/entrances/' + date ).set({
-        door: "door code",
+        door: "door id",
         time: getTime()
       });
 
