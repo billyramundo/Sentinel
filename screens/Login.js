@@ -40,10 +40,6 @@ function Login({ navigation }) {
     navigation.navigate("Home");
   };
   const storeUser = (username, password) => {
-    // database.ref('users/' + username).set({
-    //   password: password,
-    //   door: "door_id"
-    // });
     firebase.auth().createUserWithEmailAndPassword(username, password)
     .then(() => {
       console.log('User account created & signed in!');
