@@ -33,9 +33,9 @@ function Home({ navigation }) {
     navigation.navigate("Friends");
   }
   const changeLockState = () => {
-    if (lockstate == false) {
-      setLockstate(true);
-      setLockStateText("lock");
+    if (lockstate == true) {
+      setLockstate(false);
+      setLockStateText("unlock");
       var date = getDate();
       const userID = firebase.auth().currentUser.uid;
       database.ref('users/' + userID + '/entrances/' + date ).set({
@@ -52,11 +52,11 @@ function Home({ navigation }) {
           console.log(response);
         });
     }
-    if (lockstate == true) {
-      setLockstate(false);
-      setLockStateText("unlock");
+    if (lockstate == false) {
+      setLockstate(true);
+      setLockStateText("lock");
       axios
-        .post("https://p4qcydmk3c.tunnel.kundu.io/command/lock", {
+        .post("https://p4qcydmk3c.tunnel.kundu.io/command/unlock", {
           username: username,
           password: password,
         })
