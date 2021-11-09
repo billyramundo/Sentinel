@@ -47,10 +47,10 @@ function Home({ navigation }) {
   const [lockstateText, setLockStateText] = useState("unlock");
   return (
     <View style={styles.back}>
-      <View style={styles.centeredcontainer}>
+      <View style={styles.centeredcontainer} accessibilityLabel="Welcome Message">
         <Text style={styles.text}>Welcome Home, {username}</Text>
       </View>
-      <View style={styles.middlecontainer}>
+      <View style={styles.middlecontainer} accessibilityLabel="Lock and Unlock Button">
         <TouchableOpacity style={styles.lockButton} onPress={changeLockState}>
           <Text
             style={{
@@ -76,7 +76,7 @@ function Home({ navigation }) {
           </Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.middlecontainer}>
+      <View style={styles.middlecontainer} accessibilityLabel="Sentinel Logo">
         <Image source={logo} style={{ width: 200, height: 200 }}></Image>
       </View>
     </View>
