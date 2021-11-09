@@ -3,6 +3,7 @@ import { styles } from "../Styles";
 import logo from "../assets/logo.png";
 import firebase from "firebase/app";
 import "firebase/database";
+import "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDp3DdsqNfYJeCXIveh-7dDvnJhmudgdeE",
@@ -16,8 +17,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-var database = firebase.database();
-
+const database = firebase.database();
 
 import {
   Text,
@@ -40,8 +40,18 @@ function Login({ navigation }) {
     navigation.navigate("Home");
   };
   const storeUser = (username, password) => {
-    database.ref('users/' + username).set({
-      password: password
+    firebase.auth().createUserWithEmailAndPassword(username, password)
+    .then(() => {
+      console.log('User account created & signed in!');
+    })
+    .catch(error => {
+      if (error.code === 'auth/email-already-in-use') {
+        console.log('That email address is already in use!');
+      }
+      if (error.code === 'auth/invalid-email') {
+        console.log('That email address is invalid!');
+      }
+      console.error(error);
     });
   };
 
@@ -93,3 +103,4 @@ function Login({ navigation }) {
 
 export default Login;
 export { username };
+export { database };
