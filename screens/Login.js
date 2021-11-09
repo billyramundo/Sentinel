@@ -43,6 +43,9 @@ function Login({ navigation }) {
     firebase.auth().createUserWithEmailAndPassword(username, password)
     .then(() => {
       console.log('User account created & signed in!');
+      database.ref('users/' + firebase.auth().currentUser.uid).set({
+        door: "door_id"
+      });
     })
     .catch(error => {
       if (error.code === 'auth/email-already-in-use') {

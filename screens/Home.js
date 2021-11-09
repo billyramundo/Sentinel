@@ -12,6 +12,9 @@ import { username } from "../screens/Login";
 import logo from "../assets/logo.png";
 import axios from "axios";
 import {database} from "../screens/Login";
+import firebase from "firebase/app";
+import "firebase/database";
+import "firebase/auth";
 
 function Home({ navigation }) {
   const getDate = () => {
@@ -34,10 +37,12 @@ function Home({ navigation }) {
       setLockstate(true);
       setLockStateText("lock");
       var date = getDate();
-      database.ref('users/' + username + '/entrances/' + date ).set({
+      const userID = firebase.auth().currentUser.uid;
+      database.ref('users/' + userID + '/entrances/' + date ).set({
         door: "door code",
         time: getTime()
       });
+
       axios
         .post("https://p4qcydmk3c.tunnel.kundu.io/command/lock", {
           username: username,
