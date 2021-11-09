@@ -7,14 +7,10 @@ import "firebase/auth";
 import "firebase-admin";
 import { firebaseApp } from "../screens/Login";
 import { initializeApp } from "firebase-admin";
-import {credential} from "firebase-admin";
+import { credential } from "firebase-admin";
 import { database } from "../screens/Login";
 
-import {
-    View,
-    TextInput,
-    Text,
-} from "react-native";
+import { View, TextInput, Text, TouchableOpacity } from "react-native";
 import { applicationDefault } from "firebase-admin";
 
 //var admin = require("firebase-admin");
@@ -27,43 +23,107 @@ import { applicationDefault } from "firebase-admin";
 // });
 
 function Friends({ navigation }) {
-    const [email, setEmail] = useState("");
-    const [displayEmail, setDisplayEmail] = useState("");
-    //var currentAuth = firebase.auth(firebaseApp);
-    const getUser = () => {
-        database.ref().child("users").child(email).get().then((snapshot) => {
-            if (snapshot.exists()) {
-              console.log(email);
-            } else {
-              console.log("No data available");
-            }
-          }).catch((error) => {
-            console.error(error);
-          });
-        // currentAuth.getUserByEmail(email)
-        //     .then((userRecord) => {
-        //         setDisplayEmail(userRecord.getEmail());
-        //         console.log("Successfully found user");
-        //     })
-        //     .catch((error) => {
-        //         console.log("User does not exist")
-        //     });
-    };
+  const [email, setEmail] = useState("");
+  const [displayEmail, setDisplayEmail] = useState("");
+  var [showResults, setShowResults] = useState(false);
+  //var currentAuth = firebase.auth(firebaseApp);
+  const getUser = () => {
+    database
+      .ref()
+      .child("users")
+      .child(email)
+      .get()
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          console.log(email);
+          setDisplayEmail(email);
+          setShowResults(true);
+        } else {
+          console.log("No data available");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    // currentAuth.getUserByEmail(email)
+    //     .then((userRecord) => {
+    //         setDisplayEmail(userRecord.getEmail());
+    //         console.log("Successfully found user");
+    //     })
+    //     .catch((error) => {
+    //         console.log("User does not exist")
+    //     });
+  };
+  if (showResults == false) {
     return (
-        <View style={styles.back}>
-            <View style={styles.centeredcontainer}>
-                <SearchField
-                    placeholder="Search for friends"
-                    onChange={(email) => setEmail(email)}
-                    onSearchClick={getUser} />
-            </View>
-            <View style={styles.middlecontainer}>
-                <Text>{displayEmail}</Text>
-            </View>
-            <View style={styles.middlecontainer}></View>
-            <View style={styles.middlecontainer}></View>
+      <View style={styles.back}>
+        <View style={styles.centeredcontainer}>
+          <SearchField
+            placeholder="Search for friends"
+            onChange={(email) => setEmail(email)}
+            onSearchClick={getUser}
+          />
         </View>
+        <View style={styles.middlecontainer}>
+          <Text style={{ fontSize: 30 }}>No users match your search!</Text>
+        </View>
+        <View style={styles.middlecontainer}></View>
+        <View style={styles.middlecontainer}></View>
+      </View>
     );
+  } else {
+    return (
+      <View style={styles.back}>
+        <View style={styles.centeredcontainer}>
+          <SearchField
+            placeholder="Search for friends"
+            onChange={(email) => setEmail(email)}
+            onSearchClick={getUser}
+          />
+        </View>
+        <View style={styles.middlecontainer}>
+          <Text style={{ fontSize: 30 }}>
+            We found your friend,{" "}
+            <Text
+              style={{
+                color: "#3EB489",
+                textTransform: "uppercase",
+                fontSize: 30,
+              }}
+            >
+              {displayEmail}
+            </Text>
+          </Text>
+          <TouchableOpacity style={styles.button}>
+            <Text
+              style={{
+                color: "white",
+                fontSize: 30,
+                textTransform: "uppercase",
+                fontFamily: "AppleSDGothicNeo-Bold",
+              }}
+            >
+              Give Access
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+            <Text
+              style={{
+                color: "white",
+                fontSize: 30,
+                textTransform: "uppercase",
+                fontFamily: "AppleSDGothicNeo-Bold",
+              }}
+            >
+              Request Access
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.middlecontainer}></View>
+        <View style={styles.middlecontainer}></View>
+      </View>
+    );
+  }
 }
 
 export default Friends;
