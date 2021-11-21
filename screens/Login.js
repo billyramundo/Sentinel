@@ -5,123 +5,214 @@ import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
 
+import {
+  Box,
+  Text,
+  Heading,
+  VStack,
+  FormControl,
+  Input,
+  Link,
+  Button,
+  HStack,
+  Center,
+  NativeBaseProvider,
+  useColorMode
+} from "native-base"
+
+import {Alert, useColorScheme, Appearance} from "react-native"
+
+// Your web app's Firebase configuration
+
 const firebaseConfig = {
-  apiKey: "AIzaSyDp3DdsqNfYJeCXIveh-7dDvnJhmudgdeE",
-  authDomain: "sentinel-a6249.firebaseapp.com",
-  databaseURL: "https://sentinel-a6249-default-rtdb.firebaseio.com",
-  projectId: "sentinel-a6249",
-  storageBucket: "sentinel-a6249.appspot.com",
-  messagingSenderId: "1069922297779",
-  appId: "1:1069922297779:web:2f883ac3957053cb80cdc6",
-  measurementId: "G-5WBYZYXC4J",
+  apiKey: "AIzaSyCteW-dP7v8bXdmYedGy1_PZTAehNOZbxs",
+  authDomain: "test-rules-9cd64.firebaseapp.com",
+  databaseURL: "https://test-rules-9cd64-default-rtdb.firebaseio.com",
+  projectId: "test-rules-9cd64",
+  storageBucket: "test-rules-9cd64.appspot.com",
+  messagingSenderId: "598598362177",
+  appId: "1:598598362177:web:3c4f4b7aa78111893392c0"
 };
 
 const firebaseApp = firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-import {
-  Text,
-  View,
-  Button,
-  TouchableOpacity,
-  TextInput,
-  Image,
-  Alert,
-} from "react-native";
+// Log out resets stack and moves to Login page
+// const logoutAction = StackActions.reset({
+//   index: 0,
+//   actions: [StackActions.navigate({ routeName: 'Login' })],
+// });
+let logoutAction = null;
 
 let username = "";
-let email = "";
-let password = "";
+let auth = {};
 function Login({ navigation }) {
-  const [user, setUsername] = useState("");
-  const [em, setEmail] = useState("");
-  const [pass, setPassword] = useState("");
-  const movePage = () => {
-    if (em.length == 0 || pass.length == 0) {
-      Alert.alert("Please enter a username and password.");
-    } else if (pass.length < 6) {
-      Alert.alert("Password must be at least 6 characters long");
-    } else {
-      username = user;
-      email = em;
-      password = pass;
-      storeUser(email, password);
-      navigation.navigate("Home");
-    }
-  };
-  const storeUser = (email, password) => {
-    firebase.auth().createUserWithEmailAndPassword(email, password)
-    .then(() => {
-      console.log('User account created & signed in!');
-      database.ref('users/' + username).set({
-        uid: firebase.auth().currentUser.uid,
-        door: "door_id"
+  var [formData, setData] = useState({});
+  var [formErrors, setErrors] = useState({});
+
+  async function validate() {
+    formErrors = {};
+  
+    if (!('email' in formData) || formData.email.length === 0) {
+      setErrors({
+        ...formErrors,
+        email: 'Please enter your email address',
       });
-    })
-    .catch(error => {
-      if (error.code === 'auth/email-already-in-use') {
-        console.log('That email address is already in use!');
+      return false;
+    }
+
+    if (!('password' in formData) || formData.password.length === 0) {
+      setErrors({
+        ...formErrors,
+        password: 'Please enter your password',
+      });
+      return false;
+    }
+
+    // Sign in
+    auth = await firebase.auth().signInWithEmailAndPassword(formData.email, formData.password).catch(error => {
+      if (error.code === 'auth/user-not-found') {
+        setErrors({
+          ...formErrors,
+          email: 'User not found.',
+        });
+        return false;
+      } else if (error.code === 'auth/wrong-password') {
+        setErrors({
+          ...formErrors,
+          password: 'Incorrect password. Please try again.',
+        });
+        return false;
+      } else {
+        console.error(error.code);
+        console.error(error);
+        return false;
       }
-      if (error.code === 'auth/invalid-email') {
-        console.log('That email address is invalid!');
-      }
+    });
+    if(auth === undefined || auth.user === undefined) {
+      return false;
+    }
+
+    // Retrieve basic user information for storage in exported variables
+    let snapshot = await database.ref(`users/private/${auth.user.uid}`).once("value").catch(error => {
       console.error(error);
+      return false;
+    });
+
+    let username_lower = snapshot.child('username').val()
+    username = username_lower;
+    let username_stylized = snapshot.child('username-stylized').val();
+    return true;
+  };
+
+  async function onSubmit(){
+    let validated = await validate();
+    if(!validated) {
+      console.log('Login failed');
+      return;
+    }
+    console.log(`User ${username} logged in successfully`);
+    
+    // Go home AND reset nav stack
+    navigation.reset({
+      routes: [{ name: 'Home' }]
     });
   };
 
-  return (
-    <View style={styles.back}>
-      <View style={styles.centeredcontainer}>
-        <Text
-          style={{
-            color: "#3EB489",
-            fontSize: 60,
-            textTransform: "uppercase",
-            textShadowColor: "black",
-            textShadowRadius: 5,
-          }}
-        >
-          Sentinel
-        </Text>
-      </View>
-      <View style={styles.middlecontainer}>
-      <TextInput
-          style={styles.input}
-          placeholder="Username"
-          onChangeText={(user) => setUsername(user)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          onChangeText={(em) => setEmail(em)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          onChangeText={(pass) => setPassword(pass)}
-          secureTextEntry={true}
-        />
-        <TouchableOpacity style={styles.button} onPress={movePage}>
-          <Text
-            style={{
-              color: "white",
-              fontSize: 30,
-              textTransform: "uppercase",
-              fontFamily: "AppleSDGothicNeo-Bold",
-            }}
-          >
-            Login
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.middlecontainer}>
-        <Image source={logo} style={{ width: 200, height: 200 }}></Image>
-      </View>
-    </View>
+  // const { colorMode, toggleColorMode } = useColorMode();
+  // Appearance.addChangeListener(toggleColorMode);
+  // toggleColorMode(colorMode);
+  // console.warn(colorMode);
+
+  const moveCreateAccount = () => {
+    navigation.navigate("Create Account");
+  }
+
+  return (    
+    <NativeBaseProvider>
+      <Center flex={1} px="3">
+        <Box safeArea p="2" py="8" w="95%" maxW="400">
+          <Center>
+            <Heading
+              size="xl"
+              fontWeight="600"
+              color="coolGray.800"
+              _dark={{
+                color: "warmGray.50",
+              }}
+              fontFamily="Avenir"
+              fontWeight="black"
+
+            >
+              Sentinel
+            </Heading>
+          </Center>
+
+          <VStack space={3} mt="6">
+          <FormControl isRequired isInvalid={'email' in formErrors}>
+              <FormControl.Label>Email Address</FormControl.Label>
+              <Input
+                placeholder="Email"
+                onChangeText={(value) => setData({ ...formData, email: value })}
+              />
+              <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
+            </FormControl>
+            <FormControl isRequired isInvalid={'password' in formErrors}>
+              <FormControl.Label>Password</FormControl.Label>
+              <Input
+                type="password"
+                placeholder="Password"
+                onChangeText={(value) => setData({ ...formData, password: value })}
+              />
+              <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
+              {/* <Link
+                _text={{
+                  fontSize: "xs",
+                  fontWeight: "500",
+                  color: "indigo.500",
+                }}
+                alignSelf="flex-end"
+                mt="1"
+              >
+                Forgot Password?
+              </Link> */}
+            </FormControl>
+            <Center>
+              <Button mt="6" colorScheme="lightBlue" onPress={onSubmit} w="60%" maxW="250">
+                Sign In
+              </Button>
+            </Center>
+            <HStack mt="0" justifyContent="center">
+              <Text
+                fontSize="sm"
+                color="coolGray.600"
+                _dark={{
+                  color: "warmGray.200",
+                }}
+              >
+                or {" "}
+              </Text>
+              <Link
+                _text={{
+                  color: "lightBlue.500",
+                  fontWeight: "medium",
+                  fontSize: "sm",
+                }}
+                onPress={moveCreateAccount}
+                >
+                Create an account
+              </Link>
+            </HStack>
+          </VStack>
+        </Box>
+      </Center>
+    </NativeBaseProvider>
   );
 }
 
 export default Login;
 export { username };
+export { auth };
 export { database };
 export { firebaseApp };
+export { logoutAction };
