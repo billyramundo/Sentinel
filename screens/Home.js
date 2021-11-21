@@ -1,17 +1,18 @@
 import React, { useState } from "react";
+
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Image,
-  Systrace
-} from "react-native";
-import { styles } from "../Styles";
-import { auth, username } from "../screens/Login";
+  Box,
+  Heading,
+  VStack,
+  Button,
+  Center,
+  NativeBaseProvider,
+  useColorMode
+} from "native-base"
+
+import { auth, username, database } from "./Login";
 import logo from "../assets/logo.png";
 import axios from "axios";
-import {database} from "../screens/Login";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
@@ -27,80 +28,47 @@ function Home({ navigation }) {
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     return time;
   };
-  const [lockstate, setLockstate] = useState(false);
-  const password = "password";
-  const movePage = () => {
+
+  const findFriends = () => {
     navigation.navigate("Friends");
   }
-  const changeLockState = () => {
-    if (lockstate == true) {
-      setLockstate(false);
-      setLockStateText("unlock");
-      var date = getDate();
-      const userID = firebase.auth().currentUser.uid;
-      database.ref('users/' + userID + '/entrances/' + date ).set({
-        door: "door id",
-        time: getTime()
-      });
+  const openDoorControl = (doorCode) => {
+    navigation.navigate("DoorControl", {"doorCode": doorCode});
+  }
 
-      axios
-        .post("https://p4qcydmk3c.tunnel.kundu.io/command/lock", {
-          username: username,
-          password: password,
-        })
-        .then(function (response) {
-          console.log(response);
-        });
-    }
-    if (lockstate == false) {
-      setLockstate(true);
-      setLockStateText("lock");
-      axios
-        .post("https://p4qcydmk3c.tunnel.kundu.io/command/unlock", {
-          username: username,
-          password: password,
-        })
-        .then(function (response) {
-          console.log(response);
-        });
-    }
-  };
-  const [lockstateText, setLockStateText] = useState("unlock");
   return (
-    <View style={styles.back}>
-      <View style={styles.centeredcontainer} accessibilityLabel="Welcome Message">
-        <Text style={styles.text}>Welcome, {username}</Text>
-      </View>
-      <View style={styles.middlecontainer} accessibilityLabel="Lock and Unlock Button">
-        <TouchableOpacity style={styles.lockButton} onPress={changeLockState}>
-          <Text
-            style={{
-              color: "white",
-              fontSize: 42,
-              textTransform: "uppercase",
-              fontFamily: "AppleSDGothicNeo-Bold",
+    <NativeBaseProvider>
+      <Box safeArea mx="auto" mt="2" p="2" py="8" w="100%" maxW="500">
+        <Center>
+          <Heading
+            size="xl"
+            fontWeight="600"
+            color="coolGray.800"
+            _dark={{
+              color: "warmGray.50",
             }}
+            fontFamily="Avenir"
+            fontWeight="bold"
+            textAlign="center"
           >
-            {lockstateText}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={movePage}>
-          <Text
-            style={{
-              color: "white",
-              fontSize: 25,
-              textTransform: "uppercase",
-              fontFamily: "AppleSDGothicNeo-Bold",
-            }}
-          >
-            Find Friends
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.middlecontainer} accessibilityLabel="Sentinel Logo">
-        <Image source={logo} style={{ width: 200, height: 200 }}></Image>
-      </View>
-    </View>
+            Welcome home, {username}!
+          </Heading>
+        </Center>
+
+        <VStack space={3} mt="6">
+          <Center>
+            <Button mt="6" px="3" py="3" colorScheme="lightBlue" onPress={findFriends} maxW="350">
+              Find Friends
+            </Button>
+          </Center>
+          <Center>
+            <Button mt="6" px="3" py="3" colorScheme="lightBlue" onPress={() => openDoorControl(`${"doorCode1"}`)} maxW="350">
+              Open door page
+            </Button>
+          </Center>
+        </VStack>
+      </Box>
+    </NativeBaseProvider>
   );
 }
 

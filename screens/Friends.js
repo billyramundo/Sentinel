@@ -4,8 +4,7 @@ import SearchField from "react-search-field";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
-import { firebaseApp } from "../screens/Login";
-import { database } from "../screens/Login";
+import { firebaseApp, database } from "./Login";
 
 import { View, TextInput, Text, TouchableOpacity } from "react-native";
 

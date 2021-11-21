@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { styles } from "../Styles";
 import logo from "../assets/logo.png";
 import firebase from "firebase/app";
 import "firebase/database";
@@ -17,10 +16,11 @@ import {
   HStack,
   Center,
   NativeBaseProvider,
+  KeyboardAvoidingView,
   useColorMode
 } from "native-base"
 
-import {Alert, useColorScheme, Appearance} from "react-native"
+import { Alert, useColorScheme, Appearance, Platform } from "react-native"
 
 function CreateAccount({ navigation }) {
   
@@ -156,77 +156,93 @@ function CreateAccount({ navigation }) {
   return (    
     <NativeBaseProvider>
       <Center flex={1} px="3">
-        <Box safeArea p="2" py="8" w="95%" maxW="400">
-          <Center>
-            <Heading
-              size="xl"
-              fontWeight="600"
-              color="coolGray.800"
-              _dark={{
-                color: "warmGray.50",
-              }}
-              fontFamily="Avenir"
-              fontWeight="black"
-
-            >
-              Sentinel
-            </Heading>
-          </Center>
-
-          <VStack space={3} mt="6">
-            <FormControl isRequired isInvalid={'username' in formErrors}>
-              <FormControl.Label>Username</FormControl.Label>
-              <Input
-                placeholder="Username"
-                onChangeText={(value) => setData({ ...formData, username: value })}
-              />
-              <FormControl.ErrorMessage>{formErrors.username}</FormControl.ErrorMessage>
-            </FormControl>
-            <FormControl isRequired isInvalid={'email' in formErrors}>
-              <FormControl.Label>Email Address</FormControl.Label>
-              <Input
-                placeholder="Email"
-                onChangeText={(value) => setData({ ...formData, email: value })}
-              />
-              <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
-            </FormControl>
-            <FormControl isRequired isInvalid={'password' in formErrors}>
-              <FormControl.Label>Password</FormControl.Label>
-              <Input
-                type="password"
-                placeholder="Password"
-                onChangeText={(value) => setData({ ...formData, password: value })}
-              />
-              <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
-            </FormControl>
+      <KeyboardAvoidingView
+          h="auto"
+          w="95%"
+          maxW="400"
+          justifyContent="flex-end"
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={
+            Platform.select({
+               ios: () => -100,
+               android: () => 200
+            })()
+          }
+        >
+          <Box safeArea p="2" py="8" w="95%" maxW="400">
             <Center>
-              <Button mt="6" colorScheme="lightBlue" onPress={onSubmit} w="60%" maxW="250">
-                Create Account
-              </Button>
-            </Center>
-            <HStack mt="0" justifyContent="center">
-              <Text
-                fontSize="sm"
-                color="coolGray.600"
+              <Heading
+                size="xl"
+                fontWeight="600"
+                color="coolGray.800"
                 _dark={{
-                  color: "warmGray.200",
+                  color: "warmGray.50",
                 }}
+                fontFamily="Avenir"
+                fontWeight="black"
+
               >
-                Already registered?{" "}
-              <Link
-                _text={{
-                  color: "lightBlue.500",
-                  fontWeight: "medium",
-                  fontSize: "sm",
-                }}
-                onPress={moveLogin}
+                Sentinel
+              </Heading>
+            </Center>
+
+            <VStack space={3} mt="6">
+              <FormControl isRequired isInvalid={'username' in formErrors}>
+                <FormControl.Label>Username</FormControl.Label>
+                <Input
+                  placeholder="Username"
+                  onChangeText={(value) => setData({ ...formData, username: value })}
+                />
+                <FormControl.HelperText>Username must contain at least 3 characters.</FormControl.HelperText>
+                <FormControl.ErrorMessage>{formErrors.username}</FormControl.ErrorMessage>
+              </FormControl>
+              <FormControl isRequired isInvalid={'email' in formErrors}>
+                <FormControl.Label>Email Address</FormControl.Label>
+                <Input
+                  placeholder="Email"
+                  onChangeText={(value) => setData({ ...formData, email: value })}
+                />
+                <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
+              </FormControl>
+              <FormControl isRequired isInvalid={'password' in formErrors}>
+                <FormControl.Label>Password</FormControl.Label>
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  onChangeText={(value) => setData({ ...formData, password: value })}
+                />
+                <FormControl.HelperText>Password must contain at least 6 characters.</FormControl.HelperText>
+                <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
+              </FormControl>
+              <Center>
+                <Button mt="6" colorScheme="lightBlue" onPress={onSubmit} w="60%" maxW="250">
+                  Create Account
+                </Button>
+              </Center>
+              <HStack mt="0" justifyContent="center">
+                <Text
+                  fontSize="sm"
+                  color="coolGray.600"
+                  _dark={{
+                    color: "warmGray.200",
+                  }}
                 >
-                Sign in
-              </Link>
-              </Text>
-            </HStack>
-          </VStack>
-        </Box>
+                  Already registered?{" "}
+                <Link
+                  _text={{
+                    color: "lightBlue.500",
+                    fontWeight: "medium",
+                    fontSize: "sm",
+                  }}
+                  onPress={moveLogin}
+                  >
+                  Sign in
+                </Link>
+                </Text>
+              </HStack>
+            </VStack>
+          </Box>
+        </KeyboardAvoidingView>
       </Center>
     </NativeBaseProvider>
   );

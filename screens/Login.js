@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { styles } from "../Styles";
 import logo from "../assets/logo.png";
 import firebase from "firebase/app";
 import "firebase/database";
@@ -17,10 +16,11 @@ import {
   HStack,
   Center,
   NativeBaseProvider,
+  KeyboardAvoidingView,
   useColorMode
 } from "native-base"
 
-import {Alert, useColorScheme, Appearance} from "react-native"
+import { Alert, useColorScheme, Appearance, Platform } from "react-native"
 
 // Your web app's Firebase configuration
 
@@ -71,10 +71,16 @@ function Login({ navigation }) {
 
     // Sign in
     auth = await firebase.auth().signInWithEmailAndPassword(formData.email, formData.password).catch(error => {
-      if (error.code === 'auth/user-not-found') {
+      if (error.code === 'auth/invalid-email') {
         setErrors({
           ...formErrors,
-          email: 'User not found.',
+          email: 'Invalid email address',
+        });
+        return false;
+      } else if (error.code === 'auth/user-not-found') {
+        setErrors({
+          ...formErrors,
+          email: 'User not found',
         });
         return false;
       } else if (error.code === 'auth/wrong-password') {
@@ -100,8 +106,10 @@ function Login({ navigation }) {
     });
 
     let username_lower = snapshot.child('username').val()
-    username = username_lower;
     let username_stylized = snapshot.child('username-stylized').val();
+
+    username = username_lower;
+
     return true;
   };
 
@@ -131,80 +139,92 @@ function Login({ navigation }) {
   return (    
     <NativeBaseProvider>
       <Center flex={1} px="3">
-        <Box safeArea p="2" py="8" w="95%" maxW="400">
-          <Center>
-            <Heading
-              size="xl"
-              fontWeight="600"
-              color="coolGray.800"
-              _dark={{
-                color: "warmGray.50",
-              }}
-              fontFamily="Avenir"
-              fontWeight="black"
-
-            >
-              Sentinel
-            </Heading>
-          </Center>
-
-          <VStack space={3} mt="6">
-          <FormControl isRequired isInvalid={'email' in formErrors}>
-              <FormControl.Label>Email Address</FormControl.Label>
-              <Input
-                placeholder="Email"
-                onChangeText={(value) => setData({ ...formData, email: value })}
-              />
-              <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
-            </FormControl>
-            <FormControl isRequired isInvalid={'password' in formErrors}>
-              <FormControl.Label>Password</FormControl.Label>
-              <Input
-                type="password"
-                placeholder="Password"
-                onChangeText={(value) => setData({ ...formData, password: value })}
-              />
-              <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
-              {/* <Link
-                _text={{
-                  fontSize: "xs",
-                  fontWeight: "500",
-                  color: "indigo.500",
-                }}
-                alignSelf="flex-end"
-                mt="1"
-              >
-                Forgot Password?
-              </Link> */}
-            </FormControl>
+        <KeyboardAvoidingView
+          h="auto"
+          w="95%"
+          maxW="400"
+          justifyContent="flex-end"
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={
+            Platform.OS !== "web" && Platform.select({
+               ios: () => 0,
+               android: () => 200
+            })()
+          }
+        >
+          <Box safeArea p="2" py="8" w="100%">
             <Center>
-              <Button mt="6" colorScheme="lightBlue" onPress={onSubmit} w="60%" maxW="250">
-                Sign In
-              </Button>
-            </Center>
-            <HStack mt="0" justifyContent="center">
-              <Text
-                fontSize="sm"
-                color="coolGray.600"
+              <Heading
+                size="xl"
+                fontWeight="600"
+                color="coolGray.800"
                 _dark={{
-                  color: "warmGray.200",
+                  color: "warmGray.50",
                 }}
+                fontFamily="Avenir"
+                fontWeight="black"
               >
-                or {" "}
-              </Text>
-              <Link
-                _text={{
-                  color: "lightBlue.500",
-                  fontWeight: "medium",
-                  fontSize: "sm",
-                }}
-                onPress={moveCreateAccount}
+                Sentinel
+              </Heading>
+            </Center>
+            <VStack space={3} mt="6">
+            <FormControl isInvalid={'email' in formErrors}>
+                <FormControl.Label>Email Address</FormControl.Label>
+                <Input
+                  placeholder="Email"
+                  onChangeText={(value) => setData({ ...formData, email: value })}
+                />
+                <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
+              </FormControl>
+              <FormControl isInvalid={'password' in formErrors}>
+                <FormControl.Label>Password</FormControl.Label>
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  onChangeText={(value) => setData({ ...formData, password: value })}
+                />
+                <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
+                {/* <Link
+                  _text={{
+                    fontSize: "xs",
+                    fontWeight: "500",
+                    color: "indigo.500",
+                  }}
+                  alignSelf="flex-end"
+                  mt="1"
                 >
-                Create an account
-              </Link>
-            </HStack>
-          </VStack>
-        </Box>
+                  Forgot Password?
+                </Link> */}
+              </FormControl>
+              <Center>
+                <Button mt="6" colorScheme="lightBlue" onPress={onSubmit} w="60%" maxW="250">
+                  Sign In
+                </Button>
+              </Center>
+              <HStack mt="0" justifyContent="center">
+                <Text
+                  fontSize="sm"
+                  color="coolGray.600"
+                  _dark={{
+                    color: "warmGray.200",
+                  }}
+                >
+                  or {" "}
+                </Text>
+                <Link
+                  _text={{
+                    color: "lightBlue.500",
+                    fontWeight: "medium",
+                    fontSize: "sm",
+                  }}
+                  onPress={moveCreateAccount}
+                  >
+                  Create an account
+                </Link>
+              </HStack>
+            </VStack>
+          </Box>
+        </KeyboardAvoidingView>
       </Center>
     </NativeBaseProvider>
   );
