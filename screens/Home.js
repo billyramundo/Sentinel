@@ -16,12 +16,6 @@ import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
 
-const goHome = (navigation) => {
-  navigation.reset({
-    routes: [{ name: 'Home' }]
-  });
-}
-
 function Home({ navigation }) {
   const getDate = () => {
     var today = new Date();
@@ -111,4 +105,3 @@ function Home({ navigation }) {
 }
 
 export default Home;
-export { goHome };
