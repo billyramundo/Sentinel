@@ -15,10 +15,10 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Sign In" component={Login} />
+        <Stack.Screen name="Sign In" component={Login} options={{gestureDirection: 'horizontal-inverted'}}/>
         <Stack.Screen name="Create Account" component={CreateAccount} />
         <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="DoorControl" component={DoorControl} />
+        <Stack.Screen name="Door Control" component={DoorControl} />
         <Stack.Screen name="Friends" component={Friends} />
       </Stack.Navigator>
     </NavigationContainer>

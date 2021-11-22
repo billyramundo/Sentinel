@@ -33,6 +33,14 @@ function CreateAccount({ navigation }) {
     let username_stylized = 'username' in formData ? formData.username : undefined;
     let username_lower = 'username' in formData ? formData.username.toLowerCase() : undefined;
   
+    if (!('name' in formData) || formData.name.length === 0) {
+      setErrors({
+        ...formErrors,
+        email: 'Name is required',
+      });
+      return false;
+    }
+
     if (!('username' in formData) || username_lower.length === 0) {
       setErrors({
         ...formErrors,
@@ -103,12 +111,17 @@ function CreateAccount({ navigation }) {
       return false;
     });
 
-    if(auth === undefined) {
+    if(auth === undefined || auth === false) {
       console.error("Encountered unhandled error when creating new user.");
       return false;
     }
     
     console.log('User account created & signed in!');
+
+    // Put user's display name in Firebase auth
+    await auth.user.updateProfile({displayName: formData.name}).catch((error) => {
+      console.error(error);
+    });
 
     // Add user to private
     firebase.database().ref(`users/private/${auth.user.uid}`).set({
@@ -164,7 +177,7 @@ function CreateAccount({ navigation }) {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={
             Platform.select({
-               ios: () => -100,
+               ios: () => 70,
                android: () => 200
             })()
           }
@@ -187,6 +200,14 @@ function CreateAccount({ navigation }) {
             </Center>
 
             <VStack space={3} mt="6">
+            <FormControl isRequired isInvalid={'name' in formErrors}>
+                <FormControl.Label>Name</FormControl.Label>
+                <Input
+                  placeholder="Name"
+                  onChangeText={(value) => setData({ ...formData, name: value })}
+                />
+                <FormControl.ErrorMessage>{formErrors.name}</FormControl.ErrorMessage>
+              </FormControl>
               <FormControl isRequired isInvalid={'username' in formErrors}>
                 <FormControl.Label>Username</FormControl.Label>
                 <Input

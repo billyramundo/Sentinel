@@ -42,9 +42,9 @@ const database = firebase.database();
 //   index: 0,
 //   actions: [StackActions.navigate({ routeName: 'Login' })],
 // });
-let logoutAction = null;
 
 let username = "";
+let username_stylized = "";
 let auth = {};
 function Login({ navigation }) {
   var [formData, setData] = useState({});
@@ -71,7 +71,13 @@ function Login({ navigation }) {
 
     // Sign in
     auth = await firebase.auth().signInWithEmailAndPassword(formData.email, formData.password).catch(error => {
-      if (error.code === 'auth/invalid-email') {
+      if (error.code === 'auth/network-request-failed') {
+        setErrors({
+          ...formErrors,
+          password: 'Could not connect to database. Please try logging in again.',
+        });
+        return false;
+      } else if (error.code === 'auth/invalid-email') {
         setErrors({
           ...formErrors,
           email: 'Invalid email address',
@@ -105,10 +111,8 @@ function Login({ navigation }) {
       return false;
     });
 
-    let username_lower = snapshot.child('username').val()
-    let username_stylized = snapshot.child('username-stylized').val();
-
-    username = username_lower;
+    username = snapshot.child('username').val()
+    username_stylized = snapshot.child('username-stylized').val();
 
     return true;
   };
@@ -136,6 +140,30 @@ function Login({ navigation }) {
     navigation.navigate("Create Account");
   }
 
+  // set auth persistence
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .catch(function(error){
+    console.log("failed to set persistence: " + error.message)
+  });
+  // if user is logged in, go home
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+      // Retrieve basic user information for storage in exported variables
+      let snapshot = await database.ref(`users/private/${user.uid}`).once("value").catch(error => {
+        console.error(error);
+        return false;
+      });
+
+      username = snapshot.child('username').val()
+      username_stylized = snapshot.child('username-stylized').val();
+
+      navigation.reset({
+        routes: [{ name: 'Home' }]
+      });
+    }
+    return true;
+  });
+
   return (    
     <NativeBaseProvider>
       <Center flex={1} px="3">
@@ -147,7 +175,7 @@ function Login({ navigation }) {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={
             Platform.OS !== "web" && Platform.select({
-               ios: () => 0,
+               ios: () => 100,
                android: () => 200
             })()
           }
@@ -232,7 +260,7 @@ function Login({ navigation }) {
 
 export default Login;
 export { username };
+export { username_stylized };
 export { auth };
 export { database };
 export { firebaseApp };
-export { logoutAction };

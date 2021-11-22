@@ -16,18 +16,21 @@ import {
   useColorMode
 } from "native-base"
 
-function DoorControl ({ navigation, route }) {
-  const [lockstate_isLocked, setLockstate] = useState(false);
-  const [lockstateText, setLockStateText] = useState(lockstate_isLocked ? "locked" : "unlocked");
+var lastRoute = null;
 
-  const changeLockState = () => {
-    // Don't do this stuff
+function DoorControl ({ navigation, route }) {
+  let door = route.params.door;
+  const [lockstateText, setLockStateText] = useState(door.locked ? "Locked!" : "Unlocked!");
+
+  async function changeLockState() {
+    door.locked = !door.locked;
+    setLockStateText(door.locked ? "Locked!" : "Unlocked!");
     return false;
 
     const password = "password";
 
     if (lockstate_isLocked == true) {
-      setLockstate(false);
+      setLockState(false);
       setLockStateText("unlock");
       var date = getDate();
       const userID = auth.user.uid;
@@ -59,6 +62,7 @@ function DoorControl ({ navigation, route }) {
     }
   };
 
+  lastRoute = route;
   return (
     <NativeBaseProvider>
       <Center flex={1} px="3">
@@ -75,7 +79,7 @@ function DoorControl ({ navigation, route }) {
               fontWeight="black"
 
             >
-              {route.params.doorCode}
+              {route.params.door.name}
             </Heading>
           </Center>
 
