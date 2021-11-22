@@ -4,14 +4,14 @@ import SearchField from "react-search-field";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
-import "firebase-admin";
+//import "firebase-admin";
 import { firebaseApp } from "../screens/Login";
-import { initializeApp } from "firebase-admin";
-import { credential } from "firebase-admin";
+//import { initializeApp } from "firebase-admin";
+//import { credential } from "firebase-admin";
 import { database } from "../screens/Login";
 
 import { View, TextInput, Text, TouchableOpacity } from "react-native";
-import { applicationDefault } from "firebase-admin";
+//import { applicationDefault } from "firebase-admin";
 
 //var admin = require("firebase-admin");
 
