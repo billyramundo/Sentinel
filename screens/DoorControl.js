@@ -5,6 +5,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
 import { firebaseApp, database } from "./Login";
+import { useDoorList } from "./Home";
 
 import {
   Box,
@@ -19,14 +20,15 @@ import {
 var lastRoute = null;
 
 function DoorControl ({ navigation, route }) {
-  let door = route.params.door;
-  const [lockstateText, setLockStateText] = useState(door.locked ? "Locked!" : "Unlocked!");
+  const [doorList, setDoorList] = useDoorList();
+  let doorCode = route.params.doorCode;
 
-  async function changeLockState() {
-    door.locked = !door.locked;
-    setLockStateText(door.locked ? "Locked!" : "Unlocked!");
+  function changeLockState() {
+    const doorData = {...doorList};
+    const dataCopy = doorData;
+    dataCopy[doorCode].locked = !dataCopy[doorCode].locked;
+    setDoorList(dataCopy);
     return false;
-
     const password = "password";
 
     if (lockstate_isLocked == true) {
@@ -79,14 +81,14 @@ function DoorControl ({ navigation, route }) {
               fontWeight="black"
 
             >
-              {route.params.door.name}
+              {doorCode}
             </Heading>
           </Center>
 
           <VStack space={3} mt="6">
             <Center>
               <Button mt="6" px="3" py="3" colorScheme="lightBlue" onPress={changeLockState} w="60%" maxW="250">
-                {lockstateText}
+                {doorList[doorCode].locked ? "Locked!" : "Unlocked!"}
               </Button>
             </Center>
           </VStack>

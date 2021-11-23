@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import {
   Box,
@@ -7,8 +7,6 @@ import {
   Button,
   Center,
   NativeBaseProvider,
-  Container,
-  Content,
   Text,
   ScrollView,
   useColorMode
@@ -20,51 +18,78 @@ import axios from "axios";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
+import { Entypo } from "@expo/vector-icons"
 
-let doors = [
-  {
+// Witchcraft from https://stackoverflow.com/a/62002044
+function makeObservable(target) {
+  let listeners = [];
+  let value = target;
+  function get() { return value; }
+  function set(newValue) { if (value === newValue) return; value = newValue; listeners.forEach((l) => l(value)); }
+  function subscribe(listenerFunc) { listeners.push(listenerFunc); return () => unsubscribe(listenerFunc); }
+  function unsubscribe(listenerFunc) { listeners = listeners.filter((l) => l !== listenerFunc); }
+  return { get, set, subscribe };
+}
+
+const doorListStore = makeObservable({
+  "Door1": {
     name: "Door 1",
     locked: false,
   },
-  {
+  "Door2": {
     name: "Door 2",
-    locked: true,
-  },
-  {
-    name: "Door 3",
-    locked: true,
-  },
-  {
-    name: "Door 4",
     locked: false,
   },
-  {
-    name: "Door 5",
+  "Door3": {
+    name: "Door 3",
+    locked: false,
+  },
+  "Door4": {
+    name: "Door 4",
     locked: true,
   },
-  {
+  "Door5": {
+    name: "Door 5",
+    locked: false,
+  },
+  "Door6": {
     name: "Door 6",
     locked: false,
   },
-  {
+  "Door7": {
     name: "Door 7",
     locked: true,
   },
-];
+ });
 
-function doorListContent(){
-  return doors.map((door, index) => (
-  <Box>
-    <Center>
-      <Button px="3" py="3" colorScheme="lightGreen" onPress={() => openDoorControl(door.name)} maxW="350">
-        {door.name}
-      </Button>
-    </Center>
-  </Box>
-  ));
+function useDoorList() {
+  return React.useState(doorListStore.get());
 }
 
+// async function getRemoteDoorList() {
+//   let doors = await firebase.database().ref(`access-sharing/${firebase.auth().currentUser.uid}`).once("value").catch(error => {
+//     console.error(error);
+//   });
+//   console.log(doors);
+//   var updatedList = {};
+//   doors.forEach(function(doorSnapshot) {
+//     var code = doorSnapshot.key;
+//     updatedList[code] = {
+//       name: doorSnapshot.child('name').val(),
+//       locked: true,
+//       access: doorSnapshot.child('access').val()
+//     };
+//   });
+//   console.log(updatedList);
+//   return updatedList;
+// }
+
 function Home({ navigation }) {
+  const [doorList, setDoorList] = useDoorList();
+
+  // let remoteDoorList = getRemoteDoorList();
+  // setDoorList(remoteDoorList});
+  
   const getDate = () => {
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
@@ -79,8 +104,11 @@ function Home({ navigation }) {
   const findFriends = () => {
     navigation.navigate("Friends");
   }
-  const openDoorControl = (door) => {
-    navigation.navigate("Door Control", {door: door});
+  const openDoorControl = (doorCode) => {
+    navigation.navigate("Door Control", {doorCode: doorCode});
+  }
+  const openDoorRegistration = () => {
+    navigation.navigate("Register Door");
   }
   const onSignout = () => {
     firebase.auth().signOut().then(() => {
@@ -93,6 +121,17 @@ function Home({ navigation }) {
       console.error(error);
     });
   }
+
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      const doorData = {...doorList};
+      const dataCopy = doorData;
+      setDoorList(dataCopy);
+      //updateDoorList();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <NativeBaseProvider>
@@ -131,28 +170,28 @@ function Home({ navigation }) {
                 Your Doors
               </Heading>
             {/* Door list */}
-            {doors.map((door, index)=>(
-              <Box key={door.name}
+            {Object.entries(doorList).map(([doorCode, doorData])=>(
+              <Box key={doorCode}
               w="80%"
               mt="5%"
               margin="auto"
               rounded="xl"
-              borderColor="coolGray.200"
-              borderWidth="1"
+              borderColor={doorData.locked ? "red.700": "green.900"}
+              borderWidth="2"
               _dark={{
                 borderColor: "coolGray.600",
                 backgroundColor: "gray.700",
               }}
               _light={{
-                backgroundColor: door.locked ? "red.400": "green.500",
+                backgroundColor: doorData.locked ? "red.400": "green.500",
               }}
               >
                 <Box style={{flexDirection:'row', flexWrap:'wrap'}}>
-                  <Text ml="0" w="60%" px="4" py="4" onPress={() => openDoorControl(door)} maxW="350">
-                    {door.name}
+                  <Text ml="0" w="60%" px="4" py="4" onPress={() => openDoorControl(doorCode)} maxW="350" bold="1">
+                    {doorData.name}
                   </Text>
-                  <Text mr="0" w="40%" px="4" py="4" onPress={() => openDoorControl(door)} maxW="350" textAlign="right">
-                    {door.locked ? "Locked" : "Unlocked"}
+                  <Text mr="0" w="40%" px="4" py="4" onPress={() => openDoorControl(doorCode)} maxW="350" textAlign="right">
+                    {doorData.locked ? "Locked" : "Unlocked"}
                   </Text>
                 </Box>
               </Box>
@@ -197,6 +236,9 @@ function Home({ navigation }) {
               Settings
             </Heading>
             <Center>
+              <Button mt="4" px="3" py="3" colorScheme="lightBlue" onPress={openDoorRegistration} maxW="350" rounded="lg">
+                Register Door
+              </Button>
               <Button mt="4" px="3" py="3" colorScheme="red" onPress={onSignout} maxW="350" rounded="lg">
                 Sign Out
               </Button>
@@ -209,4 +251,4 @@ function Home({ navigation }) {
 }
 
 export default Home;
-export { doors };
+export { useDoorList };

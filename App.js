@@ -8,6 +8,7 @@ import CreateAccount from "./screens/CreateAccount";
 import Home from "./screens/Home";
 import DoorControl from "./screens/DoorControl";
 import Friends from "./screens/Friends";
+import RegisterDoor from "./screens/RegisterDoor"
 
 const Stack = createStackNavigator();
 
@@ -20,6 +21,7 @@ export default function App() {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Door Control" component={DoorControl} />
         <Stack.Screen name="Friends" component={Friends} />
+        <Stack.Screen name="Register Door" component={RegisterDoor} />
       </Stack.Navigator>
     </NavigationContainer>
   );
