@@ -9,6 +9,8 @@ import {
   NativeBaseProvider,
   Text,
   ScrollView,
+  Icon,
+  extendTheme,
   useColorMode
 } from "native-base"
 
@@ -18,7 +20,7 @@ import axios from "axios";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
-import { Entypo } from "@expo/vector-icons"
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 
 // Witchcraft from https://stackoverflow.com/a/62002044
 function makeObservable(target) {
@@ -35,30 +37,37 @@ const doorListStore = makeObservable({
   "Door1": {
     name: "Door 1",
     locked: false,
+    access: "owner"
   },
   "Door2": {
     name: "Door 2",
     locked: false,
+    access: "shared"
   },
   "Door3": {
     name: "Door 3",
     locked: false,
+    access: "owner"
   },
   "Door4": {
     name: "Door 4",
     locked: true,
+    access: "shared"
   },
   "Door5": {
     name: "Door 5",
     locked: false,
+    access: "owner"
   },
   "Door6": {
     name: "Door 6",
     locked: false,
+    access: "owner"
   },
   "Door7": {
     name: "Door 7",
     locked: true,
+    access: "owner"
   },
  });
 
@@ -83,6 +92,14 @@ function useDoorList() {
 //   console.log(updatedList);
 //   return updatedList;
 // }
+
+const sentinelTheme = {
+  locked: {
+    900: '#8287af',
+    800: '#7c83db',
+    700: '#b3bef6',
+  },
+};
 
 function Home({ navigation }) {
   const [doorList, setDoorList] = useDoorList();
@@ -121,6 +138,70 @@ function Home({ navigation }) {
       console.error(error);
     });
   }
+  function generateDoorButtons(doorList, filterKey, filterVal) {
+    return Object.keys(doorList).filter(doorCode => doorList[doorCode][filterKey] === filterVal).map(doorCode => 
+      <Button
+        key={doorCode}
+        w="85%"
+        mt="5%"
+        margin="auto"
+        rounded="xl"
+        borderColor={doorList[doorCode].locked ? "red.800": "green.900"}
+        borderWidth="3"
+        _dark={{
+          borderColor: "coolGray.600",
+          backgroundColor: "gray.700",
+        }}
+        _light={{
+          backgroundColor: doorList[doorCode].locked ? "red.400": "green.500",
+        }}
+        onPress={() => openDoorControl(doorCode)}
+        >
+          <Box
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            flexDirection: 'row',
+          }}
+          px="3"
+          py="2"
+          >
+          <Box w="80%" h="100%" justifyContent="center">
+            <Text fontSize="md" textAlign="left" bold="1">
+              {doorList[doorCode].name}
+            </Text>
+          </Box>
+          <Box w="20%" h="100%" justifyContent="center">
+            <Text textAlign="right">
+            {
+              doorList[doorCode].locked ?
+              <Icon
+                as={FontAwesome}
+                name="lock"
+                color="coolGray.900"
+                _dark={{
+                  color: "warmGray.50",
+                }}
+                size="md"
+              /> :
+              <Icon
+                as={FontAwesome}
+                name="unlock-alt"
+                color="green.900"
+                _dark={{
+                  color: "warmGray.50",
+                }}
+                size="md"
+              />
+            }
+            </Text>
+          </Box>
+        </Box>
+      </Button>
+    )
+  }
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -134,7 +215,7 @@ function Home({ navigation }) {
   }, [navigation]);
 
   return (
-    <NativeBaseProvider>
+    <NativeBaseProvider theme={extendTheme({colors: sentinelTheme})}>
       <ScrollView safeArea mx="auto" w="100%" maxW="500">
         <VStack space={3} mt="8" mb="8">
           {/* <Center>
@@ -169,33 +250,24 @@ function Home({ navigation }) {
               >
                 Your Doors
               </Heading>
-            {/* Door list */}
-            {Object.entries(doorList).map(([doorCode, doorData])=>(
-              <Box key={doorCode}
-              w="80%"
-              mt="5%"
-              margin="auto"
-              rounded="xl"
-              borderColor={doorData.locked ? "red.700": "green.900"}
-              borderWidth="2"
-              _dark={{
-                borderColor: "coolGray.600",
-                backgroundColor: "gray.700",
-              }}
-              _light={{
-                backgroundColor: doorData.locked ? "red.400": "green.500",
-              }}
+            {generateDoorButtons(doorList, "access", "owner")}
+          </Box>
+          <Box mt="0" mb="5">
+            <Heading
+                size="lg"
+                fontWeight="600"
+                color="coolGray.800"
+                _dark={{
+                  color: "warmGray.50",
+                }}
+                fontFamily="Avenir"
+                fontWeight="bold"
+                textAlign="left"
+                ml="5"
               >
-                <Box style={{flexDirection:'row', flexWrap:'wrap'}}>
-                  <Text ml="0" w="60%" px="4" py="4" onPress={() => openDoorControl(doorCode)} maxW="350" bold="1">
-                    {doorData.name}
-                  </Text>
-                  <Text mr="0" w="40%" px="4" py="4" onPress={() => openDoorControl(doorCode)} maxW="350" textAlign="right">
-                    {doorData.locked ? "Locked" : "Unlocked"}
-                  </Text>
-                </Box>
-              </Box>
-            ))}
+                Shared Doors
+              </Heading>
+            {generateDoorButtons(doorList, "access", "shared")}
           </Box>
           <Box mt="0" mb="5">
             <Heading
@@ -214,33 +286,102 @@ function Home({ navigation }) {
               Your Friends
             </Heading>
             <Center>
-              <Button mt="4" px="3" py="3" colorScheme="lightBlue" onPress={findFriends} maxW="350" rounded="lg">
-                Find Friends
+            <Button mt="4" rounded="lg" onPress={openDoorRegistration} backgroundColor="lightBlue.500">
+                <Box
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                  }}
+                  >
+                  <Box h="100%" justifyContent="center">
+                    <Text textAlign="right">
+                      <Icon
+                        as={FontAwesome5}
+                        name="user-plus"
+                        color="white"
+                        size="xs"
+                      />
+                    </Text>
+                  </Box>
+                  <Box ml="2" h="100%" justifyContent="center">
+                    <Text fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                      Find Friends
+                    </Text>
+                  </Box>
+                </Box>
               </Button>
             </Center>
           </Box>
           <Box>
           <Heading
-              size="lg"
-              fontWeight="600"
-              color="coolGray.800"
-              _dark={{
-                color: "warmGray.50",
-              }}
-              fontFamily="Avenir"
-              fontWeight="bold"
-              textAlign="left"
-              mt="0"
-              ml="5"
+            size="lg"
+            fontWeight="600"
+            color="coolGray.800"
+            _dark={{
+              color: "warmGray.50",
+            }}
+            fontFamily="Avenir"
+            fontWeight="bold"
+            textAlign="left"
+            mt="0"
+            ml="5"
             >
               Settings
             </Heading>
             <Center>
-              <Button mt="4" px="3" py="3" colorScheme="lightBlue" onPress={openDoorRegistration} maxW="350" rounded="lg">
-                Register Door
+              <Button mt="4" rounded="lg" onPress={openDoorRegistration} backgroundColor="lightBlue.500">
+                <Box
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                  }}
+                  >
+                  <Box h="100%" justifyContent="center">
+                    <Text textAlign="right">
+                      <Icon
+                        as={FontAwesome5}
+                        name="map-marker-alt"
+                        color="white"
+                        size="xs"
+                      />
+                    </Text>
+                  </Box>
+                  <Box ml="2" h="100%" justifyContent="center">
+                    <Text fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                      Register Door
+                    </Text>
+                  </Box>
+                </Box>
               </Button>
-              <Button mt="4" px="3" py="3" colorScheme="red" onPress={onSignout} maxW="350" rounded="lg">
-                Sign Out
+              <Button mt="4" rounded="lg" onPress={onSignout} backgroundColor="danger.600">
+                <Box
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                  }}
+                  >
+                  <Box h="100%" justifyContent="center">
+                    <Text textAlign="right">
+                      <Icon
+                        as={FontAwesome}
+                        name="sign-out"
+                        color="white"
+                        size="sm"
+                      />
+                    </Text>
+                  </Box>
+                  <Box ml="2" h="100%" justifyContent="center">
+                    <Text fontSize="sm" textAlign="left" fontWeight="bold" color="white">
+                      Sign Out
+                    </Text>
+                  </Box>
+                </Box>
               </Button>
             </Center>
           </Box>
