@@ -17,10 +17,13 @@ import {
   Center,
   NativeBaseProvider,
   KeyboardAvoidingView,
+  Icon,
+  extendTheme,
   useColorMode
 } from "native-base"
 
 import { Alert, useColorScheme, Appearance, Platform } from "react-native"
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 
 // Your web app's Firebase configuration
 
@@ -37,11 +40,57 @@ const firebaseConfig = {
 const firebaseApp = firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// Log out resets stack and moves to Login page
-// const logoutAction = StackActions.reset({
-//   index: 0,
-//   actions: [StackActions.navigate({ routeName: 'Login' })],
-// });
+const sentinelTheme = {
+  brandPrimary: {
+    regular: '#0d98d9',
+    light: '#7dd3fc',
+    dark: '#0369a1',
+  },
+  brandSecondary: {
+    regular: '#14b8a6',
+    light: '#5eead4',
+    dark: '#0f766e'
+  },
+  locked: {
+    regular: '#f87171',
+    light: '#fca5a5',
+    dark: '#b91c1c'
+  },
+  unlocked: {
+    regular: '#4ade80',
+    light: '#86efac',
+    dark: '#15803d'
+  }
+};
+
+function sentinelLogo() {
+  return (
+  <HStack>
+    <Box justifyContent="center">
+      <Text
+        fontSize={50}
+        fontWeight="600"
+        color="brandPrimary.regular"
+        fontFamily="Avenir"
+        fontWeight="black"
+        mt="1"
+        >
+        Sentinel
+      </Text>
+    </Box>
+    <Box ml="4" justifyContent="center" textAlign="center">
+      <Text>
+        <Icon
+          as={FontAwesome5}
+          name="user-shield"
+          color="brandPrimary.regular"
+          size={10}
+        />
+      </Text>
+    </Box>
+  </HStack>
+  )
+}
 
 let username = "";
 let username_stylized = "";
@@ -165,7 +214,7 @@ function Login({ navigation }) {
   });
 
   return (    
-    <NativeBaseProvider>
+    <NativeBaseProvider theme={extendTheme({colors: sentinelTheme})}>
       <Center flex={1} px="3">
         <KeyboardAvoidingView
           h="auto"
@@ -182,18 +231,7 @@ function Login({ navigation }) {
         >
           <Box safeArea p="2" py="8" w="100%">
             <Center>
-              <Heading
-                size="xl"
-                fontWeight="600"
-                color="coolGray.800"
-                _dark={{
-                  color: "warmGray.50",
-                }}
-                fontFamily="Avenir"
-                fontWeight="black"
-              >
-                Sentinel
-              </Heading>
+              {sentinelLogo()}
             </Center>
             <VStack space={3} mt="6">
             <FormControl isInvalid={'email' in formErrors}>
@@ -224,33 +262,47 @@ function Login({ navigation }) {
                   Forgot Password?
                 </Link> */}
               </FormControl>
-              <Center>
-                <Button mt="6" colorScheme="lightBlue" onPress={onSubmit} w="60%" maxW="250">
-                  Sign In
-                </Button>
-              </Center>
-              <HStack mt="0" justifyContent="center">
-                <Text
-                  fontSize="sm"
-                  color="coolGray.600"
-                  _dark={{
-                    color: "warmGray.200",
-                  }}
-                >
-                  or {" "}
-                </Text>
-                <Link
-                  _text={{
-                    color: "lightBlue.500",
-                    fontWeight: "medium",
-                    fontSize: "sm",
-                  }}
-                  onPress={moveCreateAccount}
-                  >
-                  Create an account
-                </Link>
-              </HStack>
             </VStack>
+          <Button mt="4" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
+            <HStack>
+              <Box justifyContent="center">
+                <Text textAlign="right">
+                  <Icon
+                    as={FontAwesome5}
+                    name="sign-in-alt"
+                    color="white"
+                    size="xs"
+                  />
+                </Text>
+              </Box>
+              <Box justifyContent="center">
+                <Text mt="-2px" ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                  Sign In
+                </Text>
+              </Box>
+            </HStack>
+          </Button>
+          <HStack mt="2" justifyContent="center">
+            <Text
+              fontSize="sm"
+              color="coolGray.600"
+              _dark={{
+                color: "warmGray.200",
+              }}
+            >
+              or{" "}
+            </Text>
+            <Link
+              _text={{
+                color: "brandPrimary.regular",
+                fontWeight: "medium",
+                fontSize: "sm",
+              }}
+              onPress={moveCreateAccount}
+              >
+              Create an account
+            </Link>
+          </HStack>
           </Box>
         </KeyboardAvoidingView>
       </Center>
@@ -264,3 +316,5 @@ export { username_stylized };
 export { auth };
 export { database };
 export { firebaseApp };
+export { sentinelTheme };
+export { sentinelLogo };

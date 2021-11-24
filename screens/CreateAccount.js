@@ -3,6 +3,7 @@ import logo from "../assets/logo.png";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
+import { sentinelLogo, sentinelTheme } from "./Login";
 
 import {
   Box,
@@ -17,10 +18,13 @@ import {
   Center,
   NativeBaseProvider,
   KeyboardAvoidingView,
+  Icon,
+  extendTheme,
   useColorMode
 } from "native-base"
 
 import { Alert, useColorScheme, Appearance, Platform } from "react-native"
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 
 function CreateAccount({ navigation }) {
   
@@ -167,7 +171,7 @@ function CreateAccount({ navigation }) {
   toggleColorMode(colorMode);
 
   return (    
-    <NativeBaseProvider>
+    <NativeBaseProvider theme={extendTheme({colors: sentinelTheme})}>
       <Center flex={1} px="3">
       <KeyboardAvoidingView
           h="auto"
@@ -176,27 +180,16 @@ function CreateAccount({ navigation }) {
           justifyContent="flex-end"
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={
+            Platform.OS !== 'web' ? 
             Platform.select({
                ios: () => 70,
                android: () => 200
-            })()
+            })() : 0
           }
         >
           <Box safeArea p="2" py="8" w="95%" maxW="400">
             <Center>
-              <Heading
-                size="xl"
-                fontWeight="600"
-                color="coolGray.800"
-                _dark={{
-                  color: "warmGray.50",
-                }}
-                fontFamily="Avenir"
-                fontWeight="black"
-
-              >
-                Sentinel
-              </Heading>
+              {sentinelLogo()}
             </Center>
 
             <VStack space={3} mt="6">
@@ -236,9 +229,23 @@ function CreateAccount({ navigation }) {
                 <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
               </FormControl>
               <Center>
-                <Button mt="6" colorScheme="lightBlue" onPress={onSubmit} w="60%" maxW="250">
-                  Create Account
-                </Button>
+              <Button mt="4" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
+                <HStack>
+                  <Box justifyContent="center">
+                    <Text textAlign="right">
+                      <Icon
+                        as={FontAwesome5}
+                        name="id-badge"
+                        color="white"
+                        size="xs"
+                      />
+                    </Text>
+                  </Box>
+                  <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                    Create Account
+                  </Text>
+                </HStack>
+              </Button>
               </Center>
               <HStack mt="0" justifyContent="center">
                 <Text
@@ -251,7 +258,7 @@ function CreateAccount({ navigation }) {
                   Already registered?{" "}
                 <Link
                   _text={{
-                    color: "lightBlue.500",
+                    color: "brandPrimary.regular",
                     fontWeight: "medium",
                     fontSize: "sm",
                   }}

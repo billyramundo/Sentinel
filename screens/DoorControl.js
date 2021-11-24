@@ -6,6 +6,7 @@ import "firebase/database";
 import "firebase/auth";
 import { firebaseApp, database } from "./Login";
 import { useDoorList } from "./Home";
+import { sentinelLogo, sentinelTheme } from "./Login";
 
 import {
   Box,
@@ -14,8 +15,13 @@ import {
   Button,
   Center,
   NativeBaseProvider,
+  Text,
+  Icon,
+  extendTheme,
   useColorMode
 } from "native-base"
+
+import { FontAwesome } from "@expo/vector-icons";
 
 var lastRoute = null;
 
@@ -66,29 +72,43 @@ function DoorControl ({ navigation, route }) {
 
   lastRoute = route;
   return (
-    <NativeBaseProvider>
-      <Center flex={1} px="3">
-        <Box safeArea p="2" py="8" w="100%" maxW="400">
-          <Center>
-            <Heading
-              size="xl"
-              fontWeight="600"
-              color="coolGray.800"
-              _dark={{
-                color: "warmGray.50",
-              }}
-              fontFamily="Avenir"
-              fontWeight="black"
+    <NativeBaseProvider theme={extendTheme({colors: sentinelTheme})}>
+      <Center mt="15%">
+        <Heading
+          size="xl"
+          fontWeight="600"
+          color="coolGray.800"
+          _dark={{
+            color: "warmGray.50",
+          }}
+          fontFamily="Avenir"
+          fontWeight="black"
 
-            >
-              {doorCode}
-            </Heading>
-          </Center>
-
+        >
+          {doorList[doorCode].name}
+        </Heading>
+      </Center>
+      <Center mt="30%">
+        <Box safeArea w="100%" maxW="400">
           <VStack space={3} mt="6">
             <Center>
-              <Button mt="6" px="3" py="3" colorScheme="lightBlue" onPress={changeLockState} w="60%" maxW="250">
-                {doorList[doorCode].locked ? "Locked!" : "Unlocked!"}
+              <Button
+                mt="10"
+                px="10"
+                py="10"
+                rounded="full"
+                style={{aspectRatio: 1}}
+                onPress={changeLockState}
+                backgroundColor={doorList[doorCode].locked ? "locked.regular" : "unlocked.regular"}
+                >
+                <Text>
+                  <Icon
+                    as={FontAwesome}
+                    name={doorList[doorCode].locked ? "lock" : "unlock-alt"}
+                    color="white"
+                    size="3xl"
+                  />
+                </Text>
               </Button>
             </Center>
           </VStack>

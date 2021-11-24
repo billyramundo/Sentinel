@@ -11,6 +11,7 @@ import {
   ScrollView,
   Icon,
   extendTheme,
+  HStack,
   useColorMode
 } from "native-base"
 
@@ -21,6 +22,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
+import { sentinelTheme } from "./Login";
 
 // Witchcraft from https://stackoverflow.com/a/62002044
 function makeObservable(target) {
@@ -34,40 +36,40 @@ function makeObservable(target) {
 }
 
 const doorListStore = makeObservable({
-  "Door1": {
-    name: "Door 1",
+  "door1": {
+    name: "Front Door",
     locked: false,
     access: "owner"
   },
-  "Door2": {
-    name: "Door 2",
+  "door2": {
+    name: "Enoch's Front Door",
     locked: false,
     access: "shared"
   },
-  "Door3": {
-    name: "Door 3",
+  "door3": {
+    name: "Bedroom Door",
     locked: false,
     access: "owner"
   },
-  "Door4": {
-    name: "Door 4",
+  "door4": {
+    name: "Sylvie's Apt.",
     locked: true,
     access: "shared"
   },
-  "Door5": {
-    name: "Door 5",
+  "door5": {
+    name: "Side Door",
     locked: false,
     access: "owner"
   },
-  "Door6": {
-    name: "Door 6",
+  "door6": {
+    name: " Berkley's Suite",
     locked: false,
-    access: "owner"
+    access: "shared"
   },
-  "Door7": {
-    name: "Door 7",
+  "door7": {
+    name: " Billy's Front Door",
     locked: true,
-    access: "owner"
+    access: "shared"
   },
  });
 
@@ -92,14 +94,6 @@ function useDoorList() {
 //   console.log(updatedList);
 //   return updatedList;
 // }
-
-const sentinelTheme = {
-  locked: {
-    900: '#8287af',
-    800: '#7c83db',
-    700: '#b3bef6',
-  },
-};
 
 function Home({ navigation }) {
   const [doorList, setDoorList] = useDoorList();
@@ -146,18 +140,18 @@ function Home({ navigation }) {
         mt="5%"
         margin="auto"
         rounded="xl"
-        borderColor={doorList[doorCode].locked ? "red.800": "green.900"}
+        borderColor={doorList[doorCode].locked ? "locked.dark": "unlocked.dark"}
         borderWidth="3"
         _dark={{
           borderColor: "coolGray.600",
           backgroundColor: "gray.700",
         }}
         _light={{
-          backgroundColor: doorList[doorCode].locked ? "red.400": "green.500",
+          backgroundColor: doorList[doorCode].locked ? "locked.regular": "unlocked.regular",
         }}
         onPress={() => openDoorControl(doorCode)}
         >
-          <Box
+        <Box
           style={{
             flex: 1,
             justifyContent: 'center',
@@ -169,7 +163,7 @@ function Home({ navigation }) {
           py="2"
           >
           <Box w="80%" h="100%" justifyContent="center">
-            <Text fontSize="md" textAlign="left" bold="1">
+            <Text numberOfLines={1} fontSize="md" textAlign="left" bold="1">
               {doorList[doorCode].name}
             </Text>
           </Box>
@@ -286,17 +280,10 @@ function Home({ navigation }) {
               Your Friends
             </Heading>
             <Center>
-            <Button mt="4" rounded="lg" onPress={openDoorRegistration} backgroundColor="lightBlue.500">
-                <Box
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                  }}
-                  >
-                  <Box h="100%" justifyContent="center">
-                    <Text textAlign="right">
+              <Button mt="4" mx="auto" rounded="lg" onPress={findFriends} backgroundColor="lightBlue.500">
+                <HStack>
+                  <Box justifyContent="center">
+                    <Text>
                       <Icon
                         as={FontAwesome5}
                         name="user-plus"
@@ -305,12 +292,12 @@ function Home({ navigation }) {
                       />
                     </Text>
                   </Box>
-                  <Box ml="2" h="100%" justifyContent="center">
-                    <Text fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                  <Box justifyContent="center">
+                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
                       Find Friends
                     </Text>
                   </Box>
-                </Box>
+                </HStack>
               </Button>
             </Center>
           </Box>
@@ -332,16 +319,9 @@ function Home({ navigation }) {
             </Heading>
             <Center>
               <Button mt="4" rounded="lg" onPress={openDoorRegistration} backgroundColor="lightBlue.500">
-                <Box
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                  }}
-                  >
-                  <Box h="100%" justifyContent="center">
-                    <Text textAlign="right">
+                <HStack>
+                  <Box justifyContent="center">
+                    <Text>
                       <Icon
                         as={FontAwesome5}
                         name="map-marker-alt"
@@ -350,38 +330,31 @@ function Home({ navigation }) {
                       />
                     </Text>
                   </Box>
-                  <Box ml="2" h="100%" justifyContent="center">
-                    <Text fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                  <Box justifyContent="center">
+                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
                       Register Door
                     </Text>
                   </Box>
-                </Box>
+                </HStack>
               </Button>
               <Button mt="4" rounded="lg" onPress={onSignout} backgroundColor="danger.600">
-                <Box
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                  }}
-                  >
-                  <Box h="100%" justifyContent="center">
-                    <Text textAlign="right">
+                <HStack>
+                  <Box justifyContent="center">
+                    <Text>
                       <Icon
                         as={FontAwesome}
                         name="sign-out"
                         color="white"
-                        size="sm"
+                        size="xs"
                       />
                     </Text>
                   </Box>
-                  <Box ml="2" h="100%" justifyContent="center">
-                    <Text fontSize="sm" textAlign="left" fontWeight="bold" color="white">
+                  <Box justifyContent="center">
+                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
                       Sign Out
                     </Text>
                   </Box>
-                </Box>
+                </HStack>
               </Button>
             </Center>
           </Box>
@@ -393,3 +366,4 @@ function Home({ navigation }) {
 
 export default Home;
 export { useDoorList };
+export { sentinelTheme };
