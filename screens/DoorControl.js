@@ -6,9 +6,13 @@ import "firebase/database";
 import "firebase/auth";
 import { firebaseApp, database } from "./Login";
 import { useDoorList } from "./Home";
-import { sentinelLogo, sentinelTheme } from "./Login";
+import { sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
+import { useColorScheme } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
+  View,
   Box,
   Heading,
   VStack,
@@ -18,14 +22,14 @@ import {
   Text,
   Icon,
   extendTheme,
+  ScrollView,
   useColorMode
 } from "native-base"
-
-import { FontAwesome } from "@expo/vector-icons";
 
 var lastRoute = null;
 
 function DoorControl ({ navigation, route }) {
+  const colorMode = useColorScheme();
   const [doorList, setDoorList] = useDoorList();
   let doorCode = route.params.doorCode;
 
@@ -72,48 +76,54 @@ function DoorControl ({ navigation, route }) {
 
   lastRoute = route;
   return (
-    <NativeBaseProvider theme={extendTheme({colors: sentinelTheme})}>
-      <Center mt="15%">
-        <Heading
-          size="xl"
-          fontWeight="600"
-          color="coolGray.800"
-          _dark={{
-            color: "warmGray.50",
-          }}
-          fontFamily="Avenir"
-          fontWeight="black"
-
-        >
-          {doorList[doorCode].name}
-        </Heading>
-      </Center>
-      <Center mt="30%">
-        <Box safeArea w="100%" maxW="400">
-          <VStack space={3} mt="6">
-            <Center>
-              <Button
-                mt="10"
-                px="10"
-                py="10"
-                rounded="full"
-                style={{aspectRatio: 1}}
-                onPress={changeLockState}
-                backgroundColor={doorList[doorCode].locked ? "locked.regular" : "unlocked.regular"}
-                >
-                <Text>
-                  <Icon
-                    as={FontAwesome}
-                    name={doorList[doorCode].locked ? "lock" : "unlock-alt"}
-                    color="white"
-                    size="3xl"
-                  />
-                </Text>
-              </Button>
-            </Center>
-          </VStack>
-        </Box>
-      </Center>
+    <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
+      <View w="100%" h="100%" backgroundColor={(doorList[doorCode].locked ? "locked" : "unlocked") + ".background." + colorMode}>
+        <SafeAreaView flex={1} edges={['top', 'left', 'right']}>
+          <ScrollView
+            w="100%"
+            h="100%"
+            backgroundColor={(doorList[doorCode].locked ? "locked" : "unlocked") + ".background." + colorMode}
+            showsVerticalScrollIndicator={false}
+            >
+            <VStack>
+              <Center>
+                <Heading
+                  mt="30%"
+                  size="xl"
+                  fontWeight="600"
+                  fontFamily="Avenir"
+                  fontWeight="black"
+                  color={(doorList[doorCode].locked ? "locked" : "unlocked") + "." + (colorMode === 'dark' ? 'regular' : 'dark')}
+                  >
+                  {doorList[doorCode].name}
+                </Heading>
+                <Box safeArea w="100%" maxW="400" mt="10">
+                  <Center>
+                    <Button
+                      px="0"
+                      py="0"
+                      w={200}
+                      h={200}
+                      rounded="full"
+                      onPress={changeLockState}
+                      backgroundColor="transparent"
+                      >
+                      <Text>
+                        <Icon
+                          as={FontAwesome}
+                          name={doorList[doorCode].locked ? "lock" : "unlock-alt"}
+                          color={(doorList[doorCode].locked ? "locked" : "unlocked") + "." + (colorMode === 'dark' ? 'regular' : 'dark')}
+                          size={40}
+                        />
+                      </Text>
+                    </Button>
+                  </Center>
+                </Box>
+              </Center>
+            </VStack>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
     </NativeBaseProvider>
   );
 };

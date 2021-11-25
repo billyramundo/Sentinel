@@ -3,7 +3,6 @@ import logo from "../assets/logo.png";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
-import { sentinelLogo, sentinelTheme } from "./Login";
 
 import {
   Box,
@@ -20,40 +19,33 @@ import {
   KeyboardAvoidingView,
   Icon,
   extendTheme,
+  Spinner,
   useColorMode
 } from "native-base"
 
 import { Alert, useColorScheme, Appearance, Platform } from "react-native"
+import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 
 function CreateAccount({ navigation }) {
-  
+  const colorMode = useColorScheme();
   var [formData, setData] = useState({});
   var [formErrors, setErrors] = useState({});
+  const [attemptingSubmit, setAttemptingSubmit] = useState(false);
 
   async function validate() {
-    formErrors = {};
-  
+    setErrors({});
+
     let username_stylized = 'username' in formData ? formData.username : undefined;
     let username_lower = 'username' in formData ? formData.username.toLowerCase() : undefined;
-  
-    if (!('name' in formData) || formData.name.length === 0) {
-      setErrors({
-        ...formErrors,
-        email: 'Name is required',
-      });
-      return false;
-    }
 
     if (!('username' in formData) || username_lower.length === 0) {
       setErrors({
-        ...formErrors,
         username: 'Username is required',
       });
       return false;
     } else if (username_lower.length < 3) {
       setErrors({
-        ...formErrors,
         username: 'Username is too short',
       });
       return false;
@@ -63,7 +55,6 @@ function CreateAccount({ navigation }) {
       });
       if(snapshot.exists()) {
         setErrors({
-          ...formErrors,
           username: 'Username is already taken',
         });
         return false;
@@ -72,7 +63,6 @@ function CreateAccount({ navigation }) {
 
     if (!('email' in formData) || formData.email.length === 0) {
       setErrors({
-        ...formErrors,
         email: 'Email address is required',
       });
       return false;
@@ -80,40 +70,44 @@ function CreateAccount({ navigation }) {
 
     if (!('password' in formData) || formData.password.length === 0) {
       setErrors({
-        ...formErrors,
         password: 'Password is required',
       });
       return false;
     } else if (formData.password.length < 6) {
       setErrors({
-        ...formErrors,
         password: 'Password is too short',
       });
       return false;
     }
   
     // Attempt to create user
+    setAttemptingSubmit(true);
+    let shouldReturnFalse = false;
     let auth = await firebase.auth().createUserWithEmailAndPassword(formData.email, formData.password).catch(error => {
       if (error.code === 'auth/email-already-in-use') {
         setErrors({
-          ...formErrors,
           email: 'Email address already in use',
         });
+        shouldReturnFalse = true;
         return false;
       }
       if (error.code === 'auth/invalid-email') {
         setErrors({
-          ...formErrors,
           email: 'Email address invalid',
         });
+        shouldReturnFalse = true;
         return false;
       }
       console.error(error.code);
       console.error(error);
   
       // Do not validate
+      shouldReturnFalse = true;
       return false;
     });
+    if(shouldReturnFalse) {
+      return false;
+    }
 
     if(auth === undefined || auth === false) {
       console.error("Encountered unhandled error when creating new user.");
@@ -122,30 +116,24 @@ function CreateAccount({ navigation }) {
     
     console.log('User account created & signed in!');
 
-    // Put user's display name in Firebase auth
-    await auth.user.updateProfile({displayName: formData.name}).catch((error) => {
+    // Put user's username in Firebase auth db
+    await auth.user.updateProfile({displayName: formData.username}).catch((error) => {
       console.error(error);
     });
 
     // Add user to private
     firebase.database().ref(`users/private/${auth.user.uid}`).set({
-      "username": username_lower,
-      "username-stylized": formData.username
+      "username": username_lower
     });
     // Point user's uid in public to user's username
     firebase.database().ref(`users/public/${auth.user.uid}`).set({
-      "username": username_lower,
-      "username-stylized": formData.username
+      "username": username_lower
     });
     // Point username to user; store stylized version, too
     firebase.database().ref(`usernames/${username_lower}`).set({
-      "owner": auth.user.uid
+      "owner": auth.user.uid,
+      "case-stylized": formData.username
     });
-    // Add user as owner of door
-    // firebase.database().ref(`doors/${door_id}/owners` + auth.user.uid).update({
-    //   username: true,
-    // });
-  
     return true;
   };
 
@@ -153,6 +141,7 @@ function CreateAccount({ navigation }) {
     let validated = await validate();
     if(!validated) {
       console.log('Validation Failed');
+      setAttemptingSubmit(false);
       return;
     }
     console.log('Information validated & user created successfully');
@@ -166,112 +155,117 @@ function CreateAccount({ navigation }) {
     navigation.pop()
   }
 
-  const { colorMode, toggleColorMode } = useColorMode();
-  Appearance.addChangeListener(toggleColorMode, colorMode);
-  toggleColorMode(colorMode);
-
   return (    
-    <NativeBaseProvider theme={extendTheme({colors: sentinelTheme})}>
-      <Center flex={1} px="3">
+    <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <KeyboardAvoidingView
-          h="auto"
-          w="95%"
-          maxW="400"
-          justifyContent="flex-end"
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={
-            Platform.OS !== 'web' ? 
-            Platform.select({
-               ios: () => 70,
-               android: () => 200
-            })() : 0
-          }
-        >
-          <Box safeArea p="2" py="8" w="95%" maxW="400">
-            <Center>
-              {sentinelLogo()}
-            </Center>
+        h="auto"
+        w="100%"
+        maxW="400"
+        justifyContent="flex-end"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={
+          Platform.OS !== 'web' ? 
+          Platform.select({
+              ios: () => 70,
+              android: () => 200
+          })() : 0
+        }
+      >
+        <Box safeArea px="3" py="8" w="90%" mx="auto" h="100%" justifyContent="center">
+          <Center>
+            {sentinelLogo()}
+          </Center>
 
-            <VStack space={3} mt="6">
-            <FormControl isRequired isInvalid={'name' in formErrors}>
-                <FormControl.Label>Name</FormControl.Label>
-                <Input
-                  placeholder="Name"
-                  onChangeText={(value) => setData({ ...formData, name: value })}
-                />
-                <FormControl.ErrorMessage>{formErrors.name}</FormControl.ErrorMessage>
-              </FormControl>
-              <FormControl isRequired isInvalid={'username' in formErrors}>
-                <FormControl.Label>Username</FormControl.Label>
-                <Input
-                  placeholder="Username"
-                  onChangeText={(value) => setData({ ...formData, username: value })}
-                />
-                <FormControl.HelperText>Username must contain at least 3 characters.</FormControl.HelperText>
-                <FormControl.ErrorMessage>{formErrors.username}</FormControl.ErrorMessage>
-              </FormControl>
-              <FormControl isRequired isInvalid={'email' in formErrors}>
-                <FormControl.Label>Email Address</FormControl.Label>
-                <Input
-                  placeholder="Email"
-                  onChangeText={(value) => setData({ ...formData, email: value })}
-                />
-                <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
-              </FormControl>
-              <FormControl isRequired isInvalid={'password' in formErrors}>
-                <FormControl.Label>Password</FormControl.Label>
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  onChangeText={(value) => setData({ ...formData, password: value })}
-                />
-                <FormControl.HelperText>Password must contain at least 6 characters.</FormControl.HelperText>
-                <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
-              </FormControl>
-              <Center>
-              <Button mt="4" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
-                <HStack>
-                  <Box justifyContent="center">
-                    <Text textAlign="right">
-                      <Icon
-                        as={FontAwesome5}
-                        name="id-badge"
-                        color="white"
-                        size="xs"
-                      />
-                    </Text>
-                  </Box>
-                  <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
-                    Create Account
-                  </Text>
+          <VStack space={3} mt="6">
+            <FormControl isRequired isInvalid={'username' in formErrors}>
+            <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Username</FormControl.Label>
+              <Input
+                placeholder="Username"
+                onChangeText={(value) => setData({ ...formData, username: value })}
+                _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
+                _hover={{backgroundColor: "transparent"}}
+                autoCapitalize="none"
+              />
+              <FormControl.HelperText>Username must contain at least 3 characters.</FormControl.HelperText>
+              <FormControl.ErrorMessage>{formErrors.username}</FormControl.ErrorMessage>
+            </FormControl>
+            <FormControl isRequired isInvalid={'email' in formErrors}>
+              <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Email Address</FormControl.Label>
+              <Input
+                placeholder="Email"
+                onChangeText={(value) => setData({ ...formData, email: value })}
+                _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
+                _hover={{backgroundColor: "transparent"}}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
+            </FormControl>
+            <FormControl isRequired isInvalid={'password' in formErrors}>
+            <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Password</FormControl.Label>
+              <Input
+                type="password"
+                placeholder="Password"
+                onChangeText={(value) => setData({ ...formData, password: value })}
+                _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
+                _hover={{backgroundColor: "transparent"}}
+                enablesReturnKeyAutomatically={true}
+                returnKeyType="go"
+                onSubmitEditing={onSubmit}
+              />
+              <FormControl.HelperText>Password must contain at least 6 characters.</FormControl.HelperText>
+              <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
+            </FormControl>
+            <Center>
+              <Button mt="7" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
+                <HStack display="flex" flexDirection="row" h="7">
+                  {
+                    attemptingSubmit ?
+                    (<Spinner accessibilityLabel="Loading posts" color="white" display="None" />) :
+                    (<>
+                      <Box justifyContent="center">
+                        <Text textAlign="right">
+                          <Icon
+                            as={FontAwesome5}
+                            name="id-card"
+                            color="white"
+                            size="xs" />
+                        </Text>
+                      </Box>
+                      <Box justifyContent="center">
+                        <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                          Create Account
+                        </Text>
+                      </Box>
+                    </>)
+                  }
                 </HStack>
               </Button>
-              </Center>
-              <HStack mt="0" justifyContent="center">
-                <Text
-                  fontSize="sm"
-                  color="coolGray.600"
-                  _dark={{
-                    color: "warmGray.200",
-                  }}
+            </Center>
+            <HStack mt="0" justifyContent="center">
+              <Text
+                fontSize="sm"
+                color="coolGray.600"
+                _dark={{
+                  color: "warmGray.200",
+                }}
+              >
+                Already registered?{" "}
+              <Link
+                _text={{
+                  color: "brandPrimary.regular",
+                  fontWeight: "medium",
+                  fontSize: "sm",
+                }}
+                onPress={moveLogin}
                 >
-                  Already registered?{" "}
-                <Link
-                  _text={{
-                    color: "brandPrimary.regular",
-                    fontWeight: "medium",
-                    fontSize: "sm",
-                  }}
-                  onPress={moveLogin}
-                  >
-                  Sign in
-                </Link>
-                </Text>
-              </HStack>
-            </VStack>
-          </Box>
-        </KeyboardAvoidingView>
-      </Center>
+                Sign in
+              </Link>
+              </Text>
+            </HStack>
+          </VStack>
+        </Box>
+      </KeyboardAvoidingView>
     </NativeBaseProvider>
   );
 }

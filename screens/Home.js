@@ -1,4 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { auth, username, database } from "./Login";
+import logo from "../assets/logo.png";
+import axios from "axios";
+import firebase from "firebase/app";
+import "firebase/database";
+import "firebase/auth";
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
+import { StatusBar } from 'expo-status-bar';
+import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
 
 import {
   Box,
@@ -12,17 +21,12 @@ import {
   Icon,
   extendTheme,
   HStack,
+  Pressable,
   useColorMode
 } from "native-base"
 
-import { auth, username, database } from "./Login";
-import logo from "../assets/logo.png";
-import axios from "axios";
-import firebase from "firebase/app";
-import "firebase/database";
-import "firebase/auth";
-import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
-import { sentinelTheme } from "./Login";
+import { useColorScheme } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Witchcraft from https://stackoverflow.com/a/62002044
 function makeObservable(target) {
@@ -96,6 +100,7 @@ function useDoorList() {
 // }
 
 function Home({ navigation }) {
+  const colorMode = useColorScheme();
   const [doorList, setDoorList] = useDoorList();
 
   // let remoteDoorList = getRemoteDoorList();
@@ -121,6 +126,9 @@ function Home({ navigation }) {
   const openDoorRegistration = () => {
     navigation.navigate("Register Door");
   }
+  const openAccessRule = () => {
+    navigation.navigate("Access Rule");
+  }
   const onSignout = () => {
     firebase.auth().signOut().then(() => {
       // Go to Login screen and reset nav stack
@@ -134,36 +142,31 @@ function Home({ navigation }) {
   }
   function generateDoorButtons(doorList, filterKey, filterVal) {
     return Object.keys(doorList).filter(doorCode => doorList[doorCode][filterKey] === filterVal).map(doorCode => 
-      <Button
+      <Pressable
         key={doorCode}
+        onPress={() => openDoorControl(doorCode)}
         w="85%"
         mt="5%"
-        margin="auto"
+        mx="auto"
         rounded="xl"
-        borderColor={doorList[doorCode].locked ? "locked.dark": "unlocked.dark"}
+        borderColor={(doorList[doorCode].locked ? "locked" : "unlocked") + "." + (colorMode === 'dark' ? 'regular' : 'dark')}
         borderWidth="3"
-        _dark={{
-          borderColor: "coolGray.600",
-          backgroundColor: "gray.700",
-        }}
-        _light={{
-          backgroundColor: doorList[doorCode].locked ? "locked.regular": "unlocked.regular",
-        }}
-        onPress={() => openDoorControl(doorCode)}
+        backgroundColor={(doorList[doorCode].locked ? "locked" : "unlocked") + "." + (colorMode === 'dark' ? 'background.dark' : 'regular')}
+        style={{cursor: 'pointer'}}
         >
         <Box
           style={{
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
-            width: '100%',
             flexDirection: 'row',
           }}
           px="3"
           py="2"
+          w="100%"
           >
           <Box w="80%" h="100%" justifyContent="center">
-            <Text numberOfLines={1} fontSize="md" textAlign="left" bold="1">
+            <Text numberOfLines={1} fontSize="md" textAlign="left" bold="1" color={colorMode === 'dark' ? '#fff' : '#000'}>
               {doorList[doorCode].name}
             </Text>
           </Box>
@@ -174,7 +177,7 @@ function Home({ navigation }) {
               <Icon
                 as={FontAwesome}
                 name="lock"
-                color="coolGray.900"
+                color={colorMode === 'dark' ? 'locked.regular' : 'locked.dark'}
                 _dark={{
                   color: "warmGray.50",
                 }}
@@ -183,7 +186,7 @@ function Home({ navigation }) {
               <Icon
                 as={FontAwesome}
                 name="unlock-alt"
-                color="green.900"
+                color={colorMode === 'dark' ? 'unlocked.regular' : 'unlocked.dark'}
                 _dark={{
                   color: "warmGray.50",
                 }}
@@ -193,7 +196,7 @@ function Home({ navigation }) {
             </Text>
           </Box>
         </Box>
-      </Button>
+      </Pressable>
     )
   }
 
@@ -209,8 +212,12 @@ function Home({ navigation }) {
   }, [navigation]);
 
   return (
-    <NativeBaseProvider theme={extendTheme({colors: sentinelTheme})}>
-      <ScrollView safeArea mx="auto" w="100%" maxW="500">
+    <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
+      <SafeAreaView flex={1} edges={['top', 'left', 'right']}>
+      <ScrollView mx="auto" w="100%" maxW="500" showsVerticalScrollIndicator={false}>
+        <Center mt="5">
+          {sentinelLogo()}
+        </Center>
         <VStack space={3} mt="8" mb="8">
           {/* <Center>
             <Heading
@@ -233,10 +240,6 @@ function Home({ navigation }) {
             <Heading
                 size="lg"
                 fontWeight="600"
-                color="coolGray.800"
-                _dark={{
-                  color: "warmGray.50",
-                }}
                 fontFamily="Avenir"
                 fontWeight="bold"
                 textAlign="left"
@@ -250,10 +253,6 @@ function Home({ navigation }) {
             <Heading
                 size="lg"
                 fontWeight="600"
-                color="coolGray.800"
-                _dark={{
-                  color: "warmGray.50",
-                }}
                 fontFamily="Avenir"
                 fontWeight="bold"
                 textAlign="left"
@@ -267,10 +266,6 @@ function Home({ navigation }) {
             <Heading
               size="lg"
               fontWeight="600"
-              color="coolGray.800"
-              _dark={{
-                color: "warmGray.50",
-              }}
               fontFamily="Avenir"
               fontWeight="bold"
               textAlign="left"
@@ -280,7 +275,7 @@ function Home({ navigation }) {
               Your Friends
             </Heading>
             <Center>
-              <Button mt="4" mx="auto" rounded="lg" onPress={findFriends} backgroundColor="lightBlue.500">
+              <Button mt="4" mx="auto" rounded="lg" onPress={findFriends} backgroundColor="brandPrimary.regular">
                 <HStack>
                   <Box justifyContent="center">
                     <Text>
@@ -305,10 +300,6 @@ function Home({ navigation }) {
           <Heading
             size="lg"
             fontWeight="600"
-            color="coolGray.800"
-            _dark={{
-              color: "warmGray.50",
-            }}
             fontFamily="Avenir"
             fontWeight="bold"
             textAlign="left"
@@ -318,13 +309,13 @@ function Home({ navigation }) {
               Settings
             </Heading>
             <Center>
-              <Button mt="4" rounded="lg" onPress={openDoorRegistration} backgroundColor="lightBlue.500">
+              <Button mt="4" rounded="lg" onPress={openDoorRegistration} backgroundColor="brandPrimary.regular">
                 <HStack>
                   <Box justifyContent="center">
                     <Text>
                       <Icon
                         as={FontAwesome5}
-                        name="map-marker-alt"
+                        name="plus"
                         color="white"
                         size="xs"
                       />
@@ -333,6 +324,25 @@ function Home({ navigation }) {
                   <Box justifyContent="center">
                     <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
                       Register Door
+                    </Text>
+                  </Box>
+                </HStack>
+              </Button>
+              <Button mt="4" rounded="lg" onPress={openAccessRule} backgroundColor="brandPrimary.regular">
+                <HStack>
+                  <Box justifyContent="center">
+                    <Text>
+                      <Icon
+                        as={FontAwesome5}
+                        name="key"
+                        color="white"
+                        size="xs"
+                      />
+                    </Text>
+                  </Box>
+                  <Box justifyContent="center">
+                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                      Add Access Rule
                     </Text>
                   </Box>
                 </HStack>
@@ -360,10 +370,10 @@ function Home({ navigation }) {
           </Box>
         </VStack>
       </ScrollView>
+      </SafeAreaView>
     </NativeBaseProvider>
   );
 }
 
 export default Home;
 export { useDoorList };
-export { sentinelTheme };

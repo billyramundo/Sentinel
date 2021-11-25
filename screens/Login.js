@@ -3,11 +3,11 @@ import logo from "../assets/logo.png";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 import {
   Box,
   Text,
-  Heading,
   VStack,
   FormControl,
   Input,
@@ -19,13 +19,110 @@ import {
   KeyboardAvoidingView,
   Icon,
   extendTheme,
-  useColorMode
+  Spinner
 } from "native-base"
 
-import { Alert, useColorScheme, Appearance, Platform } from "react-native"
-import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
+import { useColorScheme, Platform } from "react-native"
 
-// Your web app's Firebase configuration
+const sentinelTheme = {
+  colors: {
+    brandPrimary: {
+      regular: '#0d98d9',
+      light: '#7dd3fc',
+      dark: '#0369a1',
+    },
+    brandSecondary: {
+      regular: '#14b8a6',
+      light: '#5eead4',
+      dark: '#0f766e'
+    },
+    locked: {
+      regular: '#f87171',
+      light: '#fca5a5',
+      dark: '#991b1b',
+      background: {
+        light: '#f98585',
+        dark: '#821717'
+      }
+    },
+    unlocked: {
+      regular: '#4ade80',
+      light: '#86efac',
+      dark: '#166534',
+      background: {
+        light: '#4ade80',
+        dark: '#166534'
+      }
+    },
+    grayLabelText: {
+      light: 'muted.700',
+      dark: 'muted.400'
+    }
+  },
+};
+
+const sentinelThemeLight = {
+  colors: {
+    ...sentinelTheme.colors
+  },
+  components: {
+    Input: {
+      baseStyle: {
+        borderColor: "gray.300",
+        color: "gray.800"
+      }
+    }
+  }
+}
+
+const sentinelThemeDark = {
+  colors: {
+    ...sentinelTheme.colors
+  },
+  components: {
+    Input: {
+      baseStyle: {
+        borderColor: "gray.700",
+        color: "gray.200",
+        backgroundColor: "transparent"
+      }
+    },
+    Heading: {
+      baseStyle: {
+        color: "gray.200"
+      }
+    }
+  }
+}
+
+function sentinelLogo(color="brandPrimary.regular") {
+  return (
+  <HStack>
+    <Box justifyContent="center">
+      <Text
+        fontSize={50}
+        fontWeight="600"
+        color={color}
+        fontFamily="Avenir"
+        fontWeight="black"
+        mt="1"
+        >
+        Sentinel
+      </Text>
+    </Box>
+    <Box ml="4" justifyContent="center" textAlign="center">
+      <Text>
+        <Icon
+          as={FontAwesome5}
+          name="user-shield"
+          color={color}
+          size={10}
+        />
+      </Text>
+    </Box>
+  </HStack>
+  )
+}
 
 const firebaseConfig = {
   apiKey: "AIzaSyCteW-dP7v8bXdmYedGy1_PZTAehNOZbxs",
@@ -40,71 +137,21 @@ const firebaseConfig = {
 const firebaseApp = firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-const sentinelTheme = {
-  brandPrimary: {
-    regular: '#0d98d9',
-    light: '#7dd3fc',
-    dark: '#0369a1',
-  },
-  brandSecondary: {
-    regular: '#14b8a6',
-    light: '#5eead4',
-    dark: '#0f766e'
-  },
-  locked: {
-    regular: '#f87171',
-    light: '#fca5a5',
-    dark: '#b91c1c'
-  },
-  unlocked: {
-    regular: '#4ade80',
-    light: '#86efac',
-    dark: '#15803d'
-  }
-};
-
-function sentinelLogo() {
-  return (
-  <HStack>
-    <Box justifyContent="center">
-      <Text
-        fontSize={50}
-        fontWeight="600"
-        color="brandPrimary.regular"
-        fontFamily="Avenir"
-        fontWeight="black"
-        mt="1"
-        >
-        Sentinel
-      </Text>
-    </Box>
-    <Box ml="4" justifyContent="center" textAlign="center">
-      <Text>
-        <Icon
-          as={FontAwesome5}
-          name="user-shield"
-          color="brandPrimary.regular"
-          size={10}
-        />
-      </Text>
-    </Box>
-  </HStack>
-  )
-}
-
 let username = "";
 let username_stylized = "";
 let auth = {};
+
 function Login({ navigation }) {
+  const colorMode = useColorScheme();
   var [formData, setData] = useState({});
   var [formErrors, setErrors] = useState({});
-
+  const [attemptingSubmit, setAttemptingSubmit] = useState(false);
+  
   async function validate() {
-    formErrors = {};
+    setErrors({});
   
     if (!('email' in formData) || formData.email.length === 0) {
       setErrors({
-        ...formErrors,
         email: 'Please enter your email address',
       });
       return false;
@@ -112,35 +159,31 @@ function Login({ navigation }) {
 
     if (!('password' in formData) || formData.password.length === 0) {
       setErrors({
-        ...formErrors,
         password: 'Please enter your password',
       });
       return false;
     }
 
     // Sign in
+    setAttemptingSubmit(true);
     auth = await firebase.auth().signInWithEmailAndPassword(formData.email, formData.password).catch(error => {
       if (error.code === 'auth/network-request-failed') {
         setErrors({
-          ...formErrors,
           password: 'Could not connect to database. Please try logging in again.',
         });
         return false;
       } else if (error.code === 'auth/invalid-email') {
         setErrors({
-          ...formErrors,
           email: 'Invalid email address',
         });
         return false;
       } else if (error.code === 'auth/user-not-found') {
         setErrors({
-          ...formErrors,
           email: 'User not found',
         });
         return false;
       } else if (error.code === 'auth/wrong-password') {
         setErrors({
-          ...formErrors,
           password: 'Incorrect password. Please try again.',
         });
         return false;
@@ -170,6 +213,7 @@ function Login({ navigation }) {
     let validated = await validate();
     if(!validated) {
       console.log('Login failed');
+      setAttemptingSubmit(false);
       return;
     }
     console.log(`User ${username} logged in successfully`);
@@ -214,98 +258,111 @@ function Login({ navigation }) {
   });
 
   return (    
-    <NativeBaseProvider theme={extendTheme({colors: sentinelTheme})}>
-      <Center flex={1} px="3">
-        <KeyboardAvoidingView
-          h="auto"
-          w="95%"
-          maxW="400"
-          justifyContent="flex-end"
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={
-            Platform.OS !== "web" && Platform.select({
-               ios: () => 100,
-               android: () => 200
-            })()
-          }
-        >
-          <Box safeArea p="2" py="8" w="100%">
-            <Center>
-              {sentinelLogo()}
-            </Center>
-            <VStack space={3} mt="6">
-            <FormControl isInvalid={'email' in formErrors}>
-                <FormControl.Label>Email Address</FormControl.Label>
-                <Input
-                  placeholder="Email"
-                  onChangeText={(value) => setData({ ...formData, email: value })}
-                />
-                <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
-              </FormControl>
-              <FormControl isInvalid={'password' in formErrors}>
-                <FormControl.Label>Password</FormControl.Label>
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  onChangeText={(value) => setData({ ...formData, password: value })}
-                />
-                <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
-                {/* <Link
-                  _text={{
-                    fontSize: "xs",
-                    fontWeight: "500",
-                    color: "indigo.500",
-                  }}
-                  alignSelf="flex-end"
-                  mt="1"
-                >
-                  Forgot Password?
-                </Link> */}
-              </FormControl>
-            </VStack>
-          <Button mt="4" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
-            <HStack>
-              <Box justifyContent="center">
-                <Text textAlign="right">
-                  <Icon
-                    as={FontAwesome5}
-                    name="sign-in-alt"
-                    color="white"
-                    size="xs"
-                  />
-                </Text>
-              </Box>
-              <Box justifyContent="center">
-                <Text mt="-2px" ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
-                  Sign In
-                </Text>
-              </Box>
-            </HStack>
-          </Button>
-          <HStack mt="2" justifyContent="center">
-            <Text
-              fontSize="sm"
-              color="coolGray.600"
-              _dark={{
-                color: "warmGray.200",
-              }}
-            >
-              or{" "}
-            </Text>
-            <Link
-              _text={{
-                color: "brandPrimary.regular",
-                fontWeight: "medium",
-                fontSize: "sm",
-              }}
-              onPress={moveCreateAccount}
+    <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
+      <KeyboardAvoidingView
+        h="auto"
+        w="100%"
+        maxW="400"
+        justifyContent="flex-end"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={
+          Platform.OS !== "web" && Platform.select({
+              ios: () => 100,
+              android: () => 200
+          })()
+        }
+      >
+        <Box safeArea px="3" py="8" w="90%" mx="auto" h="100%" justifyContent="center">
+          <Center>
+            {sentinelLogo()}
+          </Center>
+          <VStack space={3} mt="6">
+          <FormControl isInvalid={'email' in formErrors}>
+              <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Email Address</FormControl.Label>
+              <Input
+                placeholder="Email"
+                onChangeText={(value) => setData({ ...formData, email: value })}
+                _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
+                _hover={{backgroundColor: "transparent"}}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
+            </FormControl>
+            <FormControl isInvalid={'password' in formErrors}>
+              <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Password</FormControl.Label>
+              <Input
+                type="password"
+                placeholder="Password"
+                onChangeText={(value) => setData({ ...formData, password: value })}
+                _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
+                _hover={{backgroundColor: "transparent"}}
+                enablesReturnKeyAutomatically={true}
+                autoCapitalize="none"
+                returnKeyType="go"
+                onSubmitEditing={onSubmit}
+              />
+              <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
+              {/* <Link
+                _text={{
+                  fontSize: "xs",
+                  fontWeight: "500",
+                  color: "indigo.500",
+                }}
+                alignSelf="flex-end"
+                mt="1"
               >
-              Create an account
-            </Link>
+                Forgot Password?
+              </Link> */}
+            </FormControl>
+          </VStack>
+        <Button mt="10" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
+          <HStack display="flex" flexDirection="row" h="7">
+            {
+              attemptingSubmit ?
+              (<Spinner accessibilityLabel="Loading posts" color="white" display="None" />) :
+              (<>
+                <Box justifyContent="center">
+                  <Text textAlign="right">
+                    <Icon
+                      as={FontAwesome5}
+                      name="sign-in-alt"
+                      color="white"
+                      size="xs" />
+                  </Text>
+                </Box>
+                <Box justifyContent="center">
+                  <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                    Sign In
+                  </Text>
+                </Box>
+              </>)
+            }
           </HStack>
-          </Box>
-        </KeyboardAvoidingView>
-      </Center>
+        </Button>
+        <HStack mt="2" justifyContent="center">
+          <Text
+            fontSize="sm"
+            color="coolGray.600"
+            _dark={{
+              color: "warmGray.200",
+            }}
+          >
+            or{" "}
+          </Text>
+          <Link
+            _text={{
+              color: "brandPrimary.regular",
+              fontWeight: "medium",
+              fontSize: "sm",
+            }}
+            onPress={moveCreateAccount}
+            >
+            Create an account
+          </Link>
+        </HStack>
+        </Box>
+      </KeyboardAvoidingView>
     </NativeBaseProvider>
   );
 }
@@ -316,5 +373,7 @@ export { username_stylized };
 export { auth };
 export { database };
 export { firebaseApp };
-export { sentinelTheme };
 export { sentinelLogo };
+export { sentinelTheme };
+export { sentinelThemeLight };
+export { sentinelThemeDark };
