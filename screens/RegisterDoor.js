@@ -3,7 +3,7 @@ import logo from "../assets/logo.png";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
-import { sentinelTheme } from "./Login";
+import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 import {
@@ -27,7 +27,7 @@ import {
 import { Alert, useColorScheme, Appearance, Platform } from "react-native"
 
 function RegisterDoor({ navigation }) {
-  
+  const colorMode = useColorScheme();
   var [formData, setData] = useState({});
   var [formErrors, setErrors] = useState({});
   const [attemptingSubmit, setAttemptingSubmit] = useState(false);
@@ -35,6 +35,7 @@ function RegisterDoor({ navigation }) {
   async function validate() {
     formErrors = {};
 
+    let shouldReturnFalse = false;
     if (!('code' in formData) || formData.code.length === 0) {
       setErrors({
         ...formErrors,
@@ -44,7 +45,7 @@ function RegisterDoor({ navigation }) {
     } else if (formData.code.length < 10) {
       setErrors({
         ...formErrors,
-        code: 'Code must be 10 digits',
+        code: 'Code must be 10 characters',
       });
       return false;
     }
@@ -52,7 +53,7 @@ function RegisterDoor({ navigation }) {
     if (!('name' in formData) || formData.name.length === 0) {
       setErrors({
         ...formErrors,
-        name: 'A door name is required',
+        name: 'A name is required',
       });
       return false;
     }
@@ -63,52 +64,70 @@ function RegisterDoor({ navigation }) {
     let uid = firebase.auth().currentUser.uid;
     let data = {};
     data[uid] = true;
-    await firebase.database().ref(`doors/${code}/owners`).set(data).catch(error => {
+    await firebase.database().ref(`/doors/${code}/owners`).set(data).catch(error => {
       if (error.code.toUpperCase() === 'PERMISSION_DENIED') {
         setErrors({
           ...formErrors,
-          code: 'An error occurred',
+          code: 'This door has already been registered.',
         });
+        shouldReturnFalse = true;
         return false;
       }
       console.error(error.code);
       console.error(error);
   
       // Do not validate
+      shouldReturnFalse = true;
       return false;
     });
+    if(shouldReturnFalse) {
+      return false;
+    }
 
-    // Add user as owner under access-sharing
-    await firebase.database().ref(`access-sharing/${uid}/${code}`).update({access: "owner"}).catch(error => {
+    data = {};
+    data[code] = true;
+    // Add door to user's list of owned doors
+    await firebase.database().ref(`/users/access/${uid}/owned`).update(data).catch(error => {
       if (error.code.toUpperCase() === 'PERMISSION_DENIED') {
         setErrors({
           ...formErrors,
           code: 'An error occurred',
         });
+        shouldReturnFalse = true;
         return false;
       }
       console.error(error.code);
       console.error(error);
-  
+
       // Do not validate
+      shouldReturnFalse = true;
       return false;
     });
+    if(shouldReturnFalse) {
+      return false;
+    }
 
     // Add nickname for door
-    await firebase.database().ref(`access-sharing/${uid}/${code}`).update({name: formData.name}).catch(error => {
+    await firebase.database().ref(`/users/access/${uid}/owned/${code}`).update({nickname: formData.name}).catch(error => {
       if (error.code.toUpperCase() === 'PERMISSION_DENIED') {
         setErrors({
           ...formErrors,
           code: 'An error occurred',
         });
+        shouldReturnFalse = true;
         return false;
       }
       console.error(error.code);
       console.error(error);
   
       // Do not validate
+      shouldReturnFalse = true;
       return false;
     });
+    if(shouldReturnFalse) {
+      return false;
+    }
+
     return true;
   };
 
@@ -116,7 +135,7 @@ function RegisterDoor({ navigation }) {
     let validated = await validate();
     if(!validated) {
       console.log('Validation Failed');
-      
+      setAttemptingSubmit(false);
       return;
     }
     console.log('Information validated & door registered successfully');
@@ -128,12 +147,8 @@ function RegisterDoor({ navigation }) {
     navigation.pop()
   }
 
-  const { colorMode, toggleColorMode } = useColorMode();
-  Appearance.addChangeListener(toggleColorMode, colorMode);
-  toggleColorMode(colorMode);
-
   return (    
-    <NativeBaseProvider theme={extendTheme(sentinelTheme)}>
+    <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <Center flex={1} px="3" mt="0">
         <KeyboardAvoidingView
           h="auto"
@@ -179,11 +194,14 @@ function RegisterDoor({ navigation }) {
               <FormControl isRequired isInvalid={'code' in formErrors}>
                 <Input
                   placeholder="10-digit code"
-                  maxLength={10}
                   autoCapitalize="characters"
+                  autoCorrect={false}
                   onChangeText={(value) => setData({ ...formData, code: value })}
+                  maxLength={10}
+                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
+                  _hover={{backgroundColor: "transparent"}}
                 />
-                <FormControl.HelperText>The 10-digit code of the Sentinel Device</FormControl.HelperText>
+                <FormControl.HelperText>The 10-character code of the Sentinel Device</FormControl.HelperText>
                 <FormControl.ErrorMessage>{formErrors.code}</FormControl.ErrorMessage>
               </FormControl>
               <FormControl isRequired isInvalid={'name' in formErrors}>
@@ -191,8 +209,13 @@ function RegisterDoor({ navigation }) {
                   placeholder="Door name"
                   autoCapitalize="words"
                   onChangeText={(value) => setData({ ...formData, name: value })}
+                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
+                  _hover={{backgroundColor: "transparent"}}
+                  enablesReturnKeyAutomatically={true}
+                  returnKeyType="go"
+                  onSubmitEditing={onSubmit}
                 />
-                <FormControl.HelperText>A name for this door, e.g. "Front Door"</FormControl.HelperText>
+                <FormControl.HelperText>A name for this door, e.g., "Front Door"</FormControl.HelperText>
                 <FormControl.ErrorMessage>{formErrors.name}</FormControl.ErrorMessage>
               </FormControl>
               <Center>

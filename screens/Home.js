@@ -6,7 +6,6 @@ import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
-import { StatusBar } from 'expo-status-bar';
 import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
 
 import {
@@ -40,20 +39,20 @@ function makeObservable(target) {
 }
 
 const doorListStore = makeObservable({
-  "door1": {
+  "p4qcydmk3c": {
     name: "Front Door",
     locked: false,
-    access: "owner"
+    access: "owned"
   },
   "door2": {
-    name: "Enoch's Front Door",
+    name: "Side Door",
     locked: false,
-    access: "shared"
+    access: "owned"
   },
   "door3": {
     name: "Bedroom Door",
     locked: false,
-    access: "owner"
+    access: "owned"
   },
   "door4": {
     name: "Sylvie's Apt.",
@@ -61,9 +60,9 @@ const doorListStore = makeObservable({
     access: "shared"
   },
   "door5": {
-    name: "Side Door",
+    name: "Enoch's Front Door",
     locked: false,
-    access: "owner"
+    access: "shared"
   },
   "door6": {
     name: " Berkley's Suite",
@@ -81,23 +80,28 @@ function useDoorList() {
   return React.useState(doorListStore.get());
 }
 
-// async function getRemoteDoorList() {
-//   let doors = await firebase.database().ref(`access-sharing/${firebase.auth().currentUser.uid}`).once("value").catch(error => {
-//     console.error(error);
-//   });
-//   console.log(doors);
-//   var updatedList = {};
-//   doors.forEach(function(doorSnapshot) {
-//     var code = doorSnapshot.key;
-//     updatedList[code] = {
-//       name: doorSnapshot.child('name').val(),
-//       locked: true,
-//       access: doorSnapshot.child('access').val()
-//     };
-//   });
-//   console.log(updatedList);
-//   return updatedList;
-// }
+async function getRemoteDoorList() {
+  let doorsOwned = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/owned`).once("value").catch(error => {
+    console.error(error);
+  });
+  let doorsShared = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/shared`).once("value").then((snapshot) => {
+
+  }).catch(error => {
+    console.error(error);
+  });
+  console.log(doors);
+  var updatedList = {};
+  doors.forEach(function(doorSnapshot) {
+    var code = doorSnapshot.key;
+    updatedList[code] = {
+      name: doorSnapshot.child('name').val(),
+      locked: true,
+      access: doorSnapshot.child('access').val()
+    };
+  });
+  console.log(updatedList);
+  return updatedList;
+}
 
 function Home({ navigation }) {
   const colorMode = useColorScheme();
@@ -116,19 +120,6 @@ function Home({ navigation }) {
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     return time;
   };
-
-  const findFriends = () => {
-    navigation.navigate("Friends");
-  }
-  const openDoorControl = (doorCode) => {
-    navigation.navigate("Door Control", {doorCode: doorCode});
-  }
-  const openDoorRegistration = () => {
-    navigation.navigate("Register Door");
-  }
-  const openAccessRule = () => {
-    navigation.navigate("Access Rule");
-  }
   const onSignout = () => {
     firebase.auth().signOut().then(() => {
       // Go to Login screen and reset nav stack
@@ -144,7 +135,7 @@ function Home({ navigation }) {
     return Object.keys(doorList).filter(doorCode => doorList[doorCode][filterKey] === filterVal).map(doorCode => 
       <Pressable
         key={doorCode}
-        onPress={() => openDoorControl(doorCode)}
+        onPress={() => {navigation.navigate("Door Control", {doorCode: doorCode});}}
         w="85%"
         mt="5%"
         mx="auto"
@@ -178,18 +169,12 @@ function Home({ navigation }) {
                 as={FontAwesome}
                 name="lock"
                 color={colorMode === 'dark' ? 'locked.regular' : 'locked.dark'}
-                _dark={{
-                  color: "warmGray.50",
-                }}
                 size="md"
               /> :
               <Icon
                 as={FontAwesome}
                 name="unlock-alt"
                 color={colorMode === 'dark' ? 'unlocked.regular' : 'unlocked.dark'}
-                _dark={{
-                  color: "warmGray.50",
-                }}
                 size="md"
               />
             }
@@ -238,16 +223,16 @@ function Home({ navigation }) {
           </Center> */}
           <Box mt="0" mb="5">
             <Heading
-                size="lg"
-                fontWeight="600"
-                fontFamily="Avenir"
-                fontWeight="bold"
-                textAlign="left"
-                ml="5"
+              size="lg"
+              fontWeight="600"
+              fontFamily="Avenir"
+              fontWeight="bold"
+              textAlign="left"
+              ml="5"
               >
-                Your Doors
-              </Heading>
-            {generateDoorButtons(doorList, "access", "owner")}
+              Your Doors
+            </Heading>
+            {generateDoorButtons(doorList, "access", "owned")}
           </Box>
           <Box mt="0" mb="5">
             <Heading
@@ -257,12 +242,12 @@ function Home({ navigation }) {
                 fontWeight="bold"
                 textAlign="left"
                 ml="5"
-              >
+                >
                 Shared Doors
               </Heading>
             {generateDoorButtons(doorList, "access", "shared")}
           </Box>
-          <Box mt="0" mb="5">
+          {/* <Box mt="0" mb="5">
             <Heading
               size="lg"
               fontWeight="600"
@@ -275,7 +260,7 @@ function Home({ navigation }) {
               Your Friends
             </Heading>
             <Center>
-              <Button mt="4" mx="auto" rounded="lg" onPress={findFriends} backgroundColor="brandPrimary.regular">
+              <Button mt="4" mx="auto" rounded="lg" onPress={() => {navigation.navigate("Friends");}} backgroundColor="brandPrimary.regular">
                 <HStack>
                   <Box justifyContent="center">
                     <Text>
@@ -295,7 +280,7 @@ function Home({ navigation }) {
                 </HStack>
               </Button>
             </Center>
-          </Box>
+          </Box> */}
           <Box>
           <Heading
             size="lg"
@@ -309,7 +294,7 @@ function Home({ navigation }) {
               Settings
             </Heading>
             <Center>
-              <Button mt="4" rounded="lg" onPress={openDoorRegistration} backgroundColor="brandPrimary.regular">
+              <Button mt="4" rounded="lg" onPress={() => {navigation.navigate("Register Door");}} backgroundColor="brandPrimary.regular">
                 <HStack>
                   <Box justifyContent="center">
                     <Text>
@@ -324,25 +309,6 @@ function Home({ navigation }) {
                   <Box justifyContent="center">
                     <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
                       Register Door
-                    </Text>
-                  </Box>
-                </HStack>
-              </Button>
-              <Button mt="4" rounded="lg" onPress={openAccessRule} backgroundColor="brandPrimary.regular">
-                <HStack>
-                  <Box justifyContent="center">
-                    <Text>
-                      <Icon
-                        as={FontAwesome5}
-                        name="key"
-                        color="white"
-                        size="xs"
-                      />
-                    </Text>
-                  </Box>
-                  <Box justifyContent="center">
-                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
-                      Add Access Rule
                     </Text>
                   </Box>
                 </HStack>

@@ -26,6 +26,7 @@ import {
 import { Alert, useColorScheme, Appearance, Platform } from "react-native"
 import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 function CreateAccount({ navigation }) {
   const colorMode = useColorScheme();
@@ -105,6 +106,7 @@ function CreateAccount({ navigation }) {
       shouldReturnFalse = true;
       return false;
     });
+
     if(shouldReturnFalse) {
       return false;
     }
@@ -152,120 +154,126 @@ function CreateAccount({ navigation }) {
   };
 
   const moveLogin = () => {
-    navigation.pop()
+    navigation.pop();
   }
 
   return (    
     <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
-      <KeyboardAvoidingView
-        h="auto"
-        w="100%"
-        maxW="400"
-        justifyContent="flex-end"
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={
-          Platform.OS !== 'web' ? 
-          Platform.select({
-              ios: () => 70,
-              android: () => 200
-          })() : 0
-        }
-      >
-        <Box safeArea px="3" py="8" w="90%" mx="auto" h="100%" justifyContent="center">
-          <Center>
-            {sentinelLogo()}
-          </Center>
-
-          <VStack space={3} mt="6">
-            <FormControl isRequired isInvalid={'username' in formErrors}>
-            <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Username</FormControl.Label>
-              <Input
-                placeholder="Username"
-                onChangeText={(value) => setData({ ...formData, username: value })}
-                _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                _hover={{backgroundColor: "transparent"}}
-                autoCapitalize="none"
-              />
-              <FormControl.HelperText>Username must contain at least 3 characters.</FormControl.HelperText>
-              <FormControl.ErrorMessage>{formErrors.username}</FormControl.ErrorMessage>
-            </FormControl>
-            <FormControl isRequired isInvalid={'email' in formErrors}>
-              <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Email Address</FormControl.Label>
-              <Input
-                placeholder="Email"
-                onChangeText={(value) => setData({ ...formData, email: value })}
-                _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                _hover={{backgroundColor: "transparent"}}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
-            </FormControl>
-            <FormControl isRequired isInvalid={'password' in formErrors}>
-            <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Password</FormControl.Label>
-              <Input
-                type="password"
-                placeholder="Password"
-                onChangeText={(value) => setData({ ...formData, password: value })}
-                _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                _hover={{backgroundColor: "transparent"}}
-                enablesReturnKeyAutomatically={true}
-                returnKeyType="go"
-                onSubmitEditing={onSubmit}
-              />
-              <FormControl.HelperText>Password must contain at least 6 characters.</FormControl.HelperText>
-              <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
-            </FormControl>
+      <SafeAreaView flex={1} edges={['top', 'left', 'right']}>
+        <KeyboardAvoidingView
+          h="auto"
+          w="100%"
+          maxW="400"
+          mx="auto"
+          justifyContent="flex-end"
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={
+            Platform.OS !== 'web' ? 
+            Platform.select({
+                ios: () => 150,
+                android: () => 0
+            })() : 0
+          }
+        >
+          <Box safeArea px="3" py="8" w="90%" mx="auto" h="100%" justifyContent="center">
             <Center>
-              <Button mt="7" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
-                <HStack display="flex" flexDirection="row" h="7">
-                  {
-                    attemptingSubmit ?
-                    (<Spinner accessibilityLabel="Loading posts" color="white" display="None" />) :
-                    (<>
-                      <Box justifyContent="center">
-                        <Text textAlign="right">
-                          <Icon
-                            as={FontAwesome5}
-                            name="id-card"
-                            color="white"
-                            size="xs" />
-                        </Text>
-                      </Box>
-                      <Box justifyContent="center">
-                        <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
-                          Create Account
-                        </Text>
-                      </Box>
-                    </>)
-                  }
-                </HStack>
-              </Button>
+              {sentinelLogo()}
             </Center>
-            <HStack mt="0" justifyContent="center">
-              <Text
-                fontSize="sm"
-                color="coolGray.600"
-                _dark={{
-                  color: "warmGray.200",
-                }}
-              >
-                Already registered?{" "}
-              <Link
-                _text={{
-                  color: "brandPrimary.regular",
-                  fontWeight: "medium",
-                  fontSize: "sm",
-                }}
-                onPress={moveLogin}
+
+            <VStack space={3} mt="6">
+              <FormControl isRequired isInvalid={'username' in formErrors}>
+              <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Username</FormControl.Label>
+                <Input
+                  size="md"
+                  placeholder="Username"
+                  onChangeText={(value) => setData({ ...formData, username: value })}
+                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
+                  _hover={{backgroundColor: "transparent"}}
+                  autoCapitalize="none"
+                />
+                <FormControl.HelperText>Username must contain at least 3 characters.</FormControl.HelperText>
+                <FormControl.ErrorMessage>{formErrors.username}</FormControl.ErrorMessage>
+              </FormControl>
+              <FormControl isRequired isInvalid={'email' in formErrors}>
+                <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Email Address</FormControl.Label>
+                <Input
+                  size="md"
+                  placeholder="Email"
+                  onChangeText={(value) => setData({ ...formData, email: value })}
+                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
+                  _hover={{backgroundColor: "transparent"}}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
+              </FormControl>
+              <FormControl isRequired isInvalid={'password' in formErrors}>
+              <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Password</FormControl.Label>
+                <Input
+                  size="md"
+                  type="password"
+                  placeholder="Password"
+                  onChangeText={(value) => setData({ ...formData, password: value })}
+                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
+                  _hover={{backgroundColor: "transparent"}}
+                  enablesReturnKeyAutomatically={true}
+                  returnKeyType="go"
+                  onSubmitEditing={onSubmit}
+                />
+                <FormControl.HelperText>Password must contain at least 6 characters.</FormControl.HelperText>
+                <FormControl.ErrorMessage>{formErrors.password}</FormControl.ErrorMessage>
+              </FormControl>
+              <Center>
+                <Button mt="7" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
+                  <HStack display="flex" flexDirection="row" h="7">
+                    {
+                      attemptingSubmit ?
+                      (<Spinner accessibilityLabel="Loading posts" color="white" display="None" />) :
+                      (<>
+                        <Box justifyContent="center">
+                          <Text textAlign="right">
+                            <Icon
+                              as={FontAwesome5}
+                              name="id-card"
+                              color="white"
+                              size="xs" />
+                          </Text>
+                        </Box>
+                        <Box justifyContent="center">
+                          <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                            Create Account
+                          </Text>
+                        </Box>
+                      </>)
+                    }
+                  </HStack>
+                </Button>
+              </Center>
+              <HStack mt="0" justifyContent="center">
+                <Text
+                  fontSize="sm"
+                  color="coolGray.600"
+                  _dark={{
+                    color: "warmGray.200",
+                  }}
                 >
-                Sign in
-              </Link>
-              </Text>
-            </HStack>
-          </VStack>
-        </Box>
-      </KeyboardAvoidingView>
+                  Already registered?{" "}
+                <Link
+                  _text={{
+                    color: "brandPrimary.regular",
+                    fontWeight: "medium",
+                    fontSize: "sm",
+                  }}
+                  onPress={moveLogin}
+                  >
+                  Sign in
+                </Link>
+                </Text>
+              </HStack>
+            </VStack>
+          </Box>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </NativeBaseProvider>
   );
 }
