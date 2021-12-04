@@ -5,6 +5,7 @@ import "firebase/database";
 import "firebase/auth";
 import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark, username, showToast, closeAllToasts, localeTimeString } from "./Login";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+//import cryptoRandomString from 'crypto-random-string';
 
 import {
   Box,
@@ -32,11 +33,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 var currentTimeType = 'start';
 var currentDay = -1;
 const toastNavigateDelay = 1000;
+ACCESS_TOKEN_LENGTH = 40;
 
 function AccessRule({ navigation, route }) {
   const colorMode = useColorScheme();
   let doorCode = route.params.doorCode;
   let recipientUid = route.params.recipientUid;
+  let recipientIsOwner = 'recipientIsOwner' in route.params ? route.params.recipientIsOwner : false;
+  //console.log(cryptoRandomString({length: ACCESS_TOKEN_LENGTH, type: 'base64'}));
   var [accessTimes, setAccessTimes] = useState([{}, {}, {}, {}, {}, {}, {}]);
   const [attemptingSubmit, setAttemptingSubmit] = useState(false);
   const [timePickerDate, setTimePickerDate] = useState(null);
@@ -120,7 +124,15 @@ function AccessRule({ navigation, route }) {
     setErrors({});
     let valid = true;
 
-    // Make sure username exists
+    // Make sure username is not empty
+    if(recipientUsername == undefined || recipientUsername.length == 0){
+      setErrors({
+        recipientUsername: "Please enter a username"
+      });
+      return false;
+    }
+
+    // Make sure username exists in database
     await firebase.database().ref(`/usernames/${recipientUsername}/owner`).once('value', (snapshot) => {
       recipientUid = snapshot.val();
       if(recipientUid === null){
@@ -136,6 +148,9 @@ function AccessRule({ navigation, route }) {
       valid = false;
       return false;
     });
+    if(!valid){
+      return false;
+    }
 
     // Make sure user is not a door owner
     await firebase.database().ref(`/doors/${doorCode}/owners`).once('value', (snapshot) => {
@@ -152,6 +167,9 @@ function AccessRule({ navigation, route }) {
       valid = false;
       return false;
     });
+    if(!valid){
+      return false;
+    }
 
     // Make sure user is not already shared with
     await firebase.database().ref(`/doors/${doorCode}/access`).once('value', (snapshot) => {
@@ -168,6 +186,9 @@ function AccessRule({ navigation, route }) {
       valid = false;
       return false;
     });
+    if(!valid){
+      return false;
+    }
 
     setNewRecipientUsernameValid(valid);
     return valid;
@@ -335,15 +356,18 @@ function AccessRule({ navigation, route }) {
               </Box>)
             }
           </Box>
-          <Box mt="10">
-            <Box mx="auto" w="100%" px="4" py="5">
-              <Center>
-                <VStack backgroundColor={colorMode === 'dark' ? "gray.900" : "gray.700"} rounded="xl" py="3">
-                  {displayRuleConfig()}
-                </VStack>
-              </Center>
-            </Box>
-          </Box>
+          {
+            recipientIsOwner ? null :
+            (<Box mt="10">
+              <Box mx="auto" w="100%" px="4" py="5">
+                <Center>
+                  <VStack backgroundColor={colorMode === 'dark' ? "gray.900" : "gray.700"} rounded="xl" py="3">
+                    {displayRuleConfig()}
+                  </VStack>
+                </Center>
+              </Box>
+            </Box>)
+          }
           <Button mt="10" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="green.700">
             <HStack display="flex" flexDirection="row" h="7">
               {

@@ -300,7 +300,7 @@ function Home({ navigation }) {
                     <Text>
                       <Icon
                         as={FontAwesome5}
-                        name="plus"
+                        name="map-marker-alt"
                         color="white"
                         size="xs"
                       />
