@@ -363,7 +363,7 @@ function Login({ navigation }) {
             <HStack display="flex" flexDirection="row" h="7">
               {
                 attemptingSubmit ?
-                (<Spinner accessibilityLabel="Loading posts" color="white" display="None" />) :
+                (<Spinner accessibilityLabel="Signing in..." color="white" display="None" />) :
                 (<>
                   <Box justifyContent="center">
                     <Text textAlign="right">

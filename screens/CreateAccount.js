@@ -228,7 +228,7 @@ function CreateAccount({ navigation }) {
                   <HStack display="flex" flexDirection="row" h="7">
                     {
                       attemptingSubmit ?
-                      (<Spinner accessibilityLabel="Loading posts" color="white" display="None" />) :
+                      (<Spinner accessibilityLabel="Creating account..." color="white" display="None" />) :
                       (<>
                         <Box justifyContent="center">
                           <Text textAlign="right">

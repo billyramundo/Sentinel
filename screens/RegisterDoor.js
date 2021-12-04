@@ -223,7 +223,7 @@ function RegisterDoor({ navigation }) {
                   <HStack display="flex" flexDirection="row" h="7">
                   {
                     attemptingSubmit ?
-                    (<Spinner accessibilityLabel="Loading posts" color="white" display="None" />) :
+                    (<Spinner accessibilityLabel="Registering door..." color="white" display="None" />) :
                     (<>
                       <Box justifyContent="center">
                         <Text textAlign="right">

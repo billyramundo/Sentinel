@@ -40,9 +40,8 @@ function AccessRule({ navigation, route }) {
   const colorMode = useColorScheme();
   let doorCode = route.params.doorCode;
   let recipientUid = route.params.recipientUid;
-  let isNewShare = recipientUid == undefined;
+  const [isNewShare, setIsNewShare] = useState(recipientUid == undefined);
   let recipientIsOwner = 'recipientIsOwner' in route.params ? route.params.recipientIsOwner : false;
-  //console.log(cryptoRandomString({length: ACCESS_TOKEN_LENGTH, type: 'base64'}));
   var [accessTimes, setAccessTimes] = useState([{}, {}, {}, {}, {}, {}, {}]);
   const [attemptingSubmit, setAttemptingSubmit] = useState(false);
   const [timePickerDate, setTimePickerDate] = useState(null);
@@ -136,7 +135,8 @@ function AccessRule({ navigation, route }) {
 
     // Make sure username exists in database
     await firebase.database().ref(`/usernames/${recipientUsername}/owner`).once('value', (snapshot) => {
-      recipientUid = snapshot.val();
+      route.params.recipientUid = snapshot.val();
+      recipientUid = route.params.recipientUid;
       if(recipientUid === null){
         setErrors({
           recipientUsername: "User not found"
@@ -223,10 +223,13 @@ function AccessRule({ navigation, route }) {
       try {
         await firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-data/${index}`).set(timeStr);
         
-        let accessToken = nanoid(ACCESS_TOKEN_LENGTH);
-        await firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-token`).set(accessToken);
-        await firebase.database().ref(`/users/access/${recipientUid}/shared/${doorCode}/access-tokens/time-weekly-whitelist`).set(accessToken);
-        accessToken = undefined;
+        if(isNewShare) {
+          let accessToken = nanoid(ACCESS_TOKEN_LENGTH);
+          await firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-token`).set(accessToken);
+          await firebase.database().ref(`/users/access/${recipientUid}/shared/${doorCode}/access-tokens/time-weekly-whitelist`).set(accessToken);
+          console.log("Generated & saved new access token");
+          accessToken = undefined;
+        }
       } catch {
         showToast("Failed to save rules! Please try again.", "error");
         return false;
@@ -257,11 +260,12 @@ function AccessRule({ navigation, route }) {
       return;
     }
     setAttemptingSubmit(false);
+    setIsNewShare(false);
   };
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      if(recipientUid != undefined) {
+      if(!isNewShare) {
         firebase.database().ref(`/users/public/${recipientUid}/username`).once('value', snapshot => {
           setRecipientUsername(snapshot.val());
         });
@@ -331,16 +335,7 @@ function AccessRule({ navigation, route }) {
         <ScrollView mx="auto" w="100%" maxW="800" showsVerticalScrollIndicator={false}>
           <Box mt="10">
             {
-              recipientUid != undefined ?
-              (<Heading
-                size="xl"
-                fontWeight="600"
-                fontFamily="Avenir"
-                fontWeight="bold"
-                textAlign="center"
-                >
-                {recipientUsername + "'s Access"}
-              </Heading>) :
+              isNewShare ?
               (<Box mx="20%">
                 <FormControl isInvalid={'recipientUsername' in formErrors}>
                   <Input
@@ -358,7 +353,16 @@ function AccessRule({ navigation, route }) {
                     <FormControl.ErrorMessage>{formErrors.recipientUsername}</FormControl.ErrorMessage>
                   </Center>
                 </FormControl>
-              </Box>)
+              </Box>) :
+              (<Heading
+                size="xl"
+                fontWeight="600"
+                fontFamily="Avenir"
+                fontWeight="bold"
+                textAlign="center"
+                >
+                {recipientUsername + "'s Access"}
+              </Heading>)
             }
           </Box>
           {
@@ -377,7 +381,7 @@ function AccessRule({ navigation, route }) {
             <HStack display="flex" flexDirection="row" h="7">
               {
                 attemptingSubmit ?
-                (<Spinner accessibilityLabel="Loading posts" color="white" display="None" />) :
+                (<Spinner accessibilityLabel="Saving rules..." color="white" display="None" />) :
                 (<>
                   <Box justifyContent="center">
                     <Text textAlign="right">
@@ -398,7 +402,7 @@ function AccessRule({ navigation, route }) {
             </HStack>
           </Button>
           {
-            recipientUid == undefined ?
+            isNewShare ?
             null :
             <>
             <Center mt="5"><Text color={colorMode === 'dark' ? "gray.200" : "gray.800"}>or</Text></Center>
@@ -406,7 +410,7 @@ function AccessRule({ navigation, route }) {
               <HStack display="flex" flexDirection="row" h="7">
                 {
                   attemptingSubmit ?
-                  (<Spinner accessibilityLabel="Loading posts" color="white" display="None" />) :
+                  (<Spinner accessibilityLabel="Saving access..." color="white" display="None" />) :
                   (<>
                     <Box justifyContent="center">
                       <Text textAlign="right">
