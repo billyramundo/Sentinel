@@ -30,7 +30,7 @@ const sentinelTheme = {
   colors: {
     brandPrimary: {
       regular: '#0d98d9',
-      light: '#7dd3fc',
+      light: '#38bdf8',
       dark: '#0369a1',
     },
     brandSecondary: {

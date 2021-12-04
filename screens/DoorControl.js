@@ -184,7 +184,7 @@ function DoorControl ({ navigation, route }) {
           pt="4"
           pb="5"
           w="100%"
-          backgroundColor={fgColor}
+          backgroundColor={cardBgColor}
           >
           <Box>
             <Text
@@ -209,13 +209,13 @@ function DoorControl ({ navigation, route }) {
                       <Icon
                         as={FontAwesome5}
                         name="user-plus"
-                        color={fgColor}
+                        color={textColor}
                         size="xs"
                       />
                     </Text>
                   </Box>
                   <Box justifyContent="center">
-                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color={fgColor}>
+                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color={textColor}>
                       Add Access Rule
                     </Text>
                   </Box>
@@ -228,7 +228,7 @@ function DoorControl ({ navigation, route }) {
               <Button
               rounded="lg"
               onPress={() => {navigation.navigate("Door Sharing", {doorCode: doorCode, recipientIsOwner: true});}}
-              backgroundColor={colorMode === 'dark' ? "brandPrimary.dark" : "brandPrimary.regular"}
+              backgroundColor={colorMode === 'dark' ? "brandPrimary.dark" : "brandPrimary.light"}
               >
                 <HStack>
                   <Box justifyContent="center">
@@ -236,13 +236,13 @@ function DoorControl ({ navigation, route }) {
                       <Icon
                         as={FontAwesome5}
                         name="key"
-                        color={colorMode === 'dark' ? "white" : "black"}
+                        color={textColor}
                         size="xs"
                       />
                     </Text>
                   </Box>
                   <Box justifyContent="center">
-                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color={colorMode === 'dark' ? "white" : "black"}>
+                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color={textColor}>
                       Add Door Owner
                     </Text>
                   </Box>
