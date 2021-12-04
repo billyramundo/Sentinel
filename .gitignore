@@ -120,3 +120,6 @@ dist
 
 # Expo
 .expo/web/cache
+
+# macOS indexing
+.DS_Store
