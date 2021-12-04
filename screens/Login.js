@@ -139,6 +139,8 @@ const firebaseConfig = {
 const firebaseApp = firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
+const ACCESS_TOKEN_LENGTH = 20;
+
 let username = "";
 let username_stylized = "";
 let auth = {};
@@ -421,3 +423,4 @@ export { sentinelThemeLight };
 export { sentinelThemeDark };
 export { showToast, closeAllToasts };
 export { localeTimeString };
+export { ACCESS_TOKEN_LENGTH };

@@ -10,7 +10,7 @@ import { sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
 import { Platform, useColorScheme } from "react-native";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Swiper from "react-native-swiper";
+import Swiper from 'react-native-swiper/src';
 
 import {
   View,
@@ -101,7 +101,7 @@ function DoorControl ({ navigation, route }) {
       database.ref(`/doors/${doorCode}/access`).once('value', snapshot => {
         snapshot.forEach(function(result) {
           let recipientUid = result.key;
-          newSharingData[recipientUid] = Array.from({...result.child('time-weekly-whitelist').val(), length:7});
+          newSharingData[recipientUid] = Array.from({...result.child('time-weekly-whitelist/access-data').val(), length:7});
         });
       })
       .then(async function() {

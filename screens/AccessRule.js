@@ -5,7 +5,8 @@ import "firebase/database";
 import "firebase/auth";
 import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark, username, showToast, closeAllToasts, localeTimeString } from "./Login";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-//import cryptoRandomString from 'crypto-random-string';
+import 'react-native-get-random-values';
+import { nanoid } from 'nanoid';
 
 import {
   Box,
@@ -24,21 +25,22 @@ import {
   extendTheme,
   Toast,
   Spinner
-} from "native-base"
+} from "native-base";
 
 import { Alert, useColorScheme, Appearance, Platform } from "react-native"
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ACCESS_TOKEN_LENGTH } from "./Login";
 
 var currentTimeType = 'start';
 var currentDay = -1;
 const toastNavigateDelay = 1000;
-ACCESS_TOKEN_LENGTH = 40;
 
 function AccessRule({ navigation, route }) {
   const colorMode = useColorScheme();
   let doorCode = route.params.doorCode;
   let recipientUid = route.params.recipientUid;
+  let isNewShare = recipientUid == undefined;
   let recipientIsOwner = 'recipientIsOwner' in route.params ? route.params.recipientIsOwner : false;
   //console.log(cryptoRandomString({length: ACCESS_TOKEN_LENGTH, type: 'base64'}));
   var [accessTimes, setAccessTimes] = useState([{}, {}, {}, {}, {}, {}, {}]);
@@ -113,7 +115,7 @@ function AccessRule({ navigation, route }) {
       showToast(`Revoked ${recipientUsername}'s access`, "success");
       setAccessTimes([{}, {}, {}, {}, {}, {}, {}]);
     } catch {
-      showToast("Failed to revoke access!", "error");
+      showToast("ERROR: Failed to revoke access!", "error");
       return false;
     }
 
@@ -198,7 +200,7 @@ function AccessRule({ navigation, route }) {
     setAttemptingSubmit(true);
     setErrors({});
 
-    if(recipientUid == undefined && !(await validateRecipientUsername())){
+    if(isNewShare && !(await validateRecipientUsername())){
       return false;
     }
 
@@ -210,7 +212,7 @@ function AccessRule({ navigation, route }) {
     for (var index = 0; index < accessTimes.length; index++) {
       if(Object.keys(accessTimes[index]).length < 2) {
         try {
-          firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/${index}`).remove();
+          firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-data/${index}`).remove();
           continue;
         } catch {
           showToast("Failed to save rules! Please try again.", "error");
@@ -219,7 +221,12 @@ function AccessRule({ navigation, route }) {
       }
       let timeStr = String(accessTimes[index].start) + "," + String(accessTimes[index].end);
       try {
-        await firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/${index}`).set(timeStr);
+        await firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-data/${index}`).set(timeStr);
+        
+        let accessToken = nanoid(ACCESS_TOKEN_LENGTH);
+        await firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-token`).set(accessToken);
+        await firebase.database().ref(`/users/access/${recipientUid}/shared/${doorCode}/access-tokens/time-weekly-whitelist`).set(accessToken);
+        accessToken = undefined;
       } catch {
         showToast("Failed to save rules! Please try again.", "error");
         return false;
@@ -227,16 +234,14 @@ function AccessRule({ navigation, route }) {
     }
 
     try {
-      let data = {};
-      data['nickname'] = `${username}'s Door`;
-      await firebase.database().ref(`/users/access/${recipientUid}/shared/${doorCode}`).set(data);
+      await firebase.database().ref(`/users/access/${recipientUid}/shared/${doorCode}/nickname`).set(`${username}'s Door`);
     } catch(error) {
       console.error(error);
       showToast("Failed to share door!", "error");
       try {
         firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist`).remove();
       } catch {
-        showToast("FATAL ERROR: COULD NOT REVOKE ACCESS AFTER FAILING TO SHARE DOOR", "error");
+        showToast("CRITICAL ERROR: COULD NOT REVOKE ACCESS AFTER FAILING TO SHARE DOOR", "error");
       }
       return false;
     }
@@ -263,7 +268,7 @@ function AccessRule({ navigation, route }) {
       }
 
       let newAccessTimes = [...accessTimes];
-      firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist`).once('value', snapshot => {
+      firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-data`).once('value', snapshot => {
         snapshot.forEach(function(result) {
           let accessObj = {};
           let index = parseInt(result.key);
@@ -285,8 +290,8 @@ function AccessRule({ navigation, route }) {
     return accessTimes.map(function(dayAccess, index)
       {
         return (
-          <Box key={index} mx="auto" px="4" py="1">
-            <HStack>
+          <Box key={index} mx="auto" px="4" py="1" w="100%">
+            <HStack w="100%">
               <Box w="30%" justifyContent="center">
                 <Text fontSize="md" textAlign="left" fontWeight="medium" color={textColor}>{daysOfWeek[index]}</Text>
               </Box>
@@ -323,7 +328,7 @@ function AccessRule({ navigation, route }) {
   return (    
     <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <SafeAreaView flex={1} edges={['top', 'left', 'right']}>
-        <ScrollView mx="auto" w="100%" maxW="500" showsVerticalScrollIndicator={false}>
+        <ScrollView mx="auto" w="100%" maxW="800" showsVerticalScrollIndicator={false}>
           <Box mt="10">
             {
               recipientUid != undefined ?
@@ -360,8 +365,8 @@ function AccessRule({ navigation, route }) {
             recipientIsOwner ? null :
             (<Box mt="10">
               <Box mx="auto" w="100%" px="4" py="5">
-                <Center>
-                  <VStack backgroundColor={colorMode === 'dark' ? "gray.900" : "gray.700"} rounded="xl" py="3">
+                <Center w="100%">
+                  <VStack w="100%" backgroundColor={colorMode === 'dark' ? "gray.900" : "gray.700"} rounded="xl" py="3">
                     {displayRuleConfig()}
                   </VStack>
                 </Center>
