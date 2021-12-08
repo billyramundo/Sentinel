@@ -44,8 +44,8 @@ const doorListStore = makeObservable({
     locked: false,
     access: "owned"
   },
-  "door2": {
-    name: "Side Door",
+  "abcdefghi1": {
+    name: "Enoch Door 1",
     locked: false,
     access: "owned"
   },
@@ -54,8 +54,8 @@ const doorListStore = makeObservable({
     locked: false,
     access: "owned"
   },
-  "door4": {
-    name: "Sylvie's Apt.",
+  "abcdefghi2": {
+    name: "Billy Door 1",
     locked: true,
     access: "shared"
   },
@@ -85,7 +85,7 @@ async function getRemoteDoorList() {
     console.error(error);
   });
   let doorsShared = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/shared`).once("value").then((snapshot) => {
-
+``
   }).catch(error => {
     console.error(error);
   });
