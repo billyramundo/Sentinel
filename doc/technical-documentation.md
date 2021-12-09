@@ -32,7 +32,7 @@ Sentinel Database
   - username
     - case-stylized: cs-username
     - owner: user-id
-- usernames
+- users
   - access
     - user-id
       - owned
