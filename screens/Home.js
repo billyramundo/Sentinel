@@ -184,7 +184,7 @@ function Home({ navigation }) {
       var code = doorSnapshot.key;
       updatedList[code] = {
         name: doorSnapshot.child('nickname').val(),
-        locked: true,
+        locked: false,
         access: "owned"
       };
     });
@@ -193,7 +193,7 @@ function Home({ navigation }) {
       var code = doorSnapshot.key;
       updatedList[code] = {
         name: doorSnapshot.child('nickname').val(),
-        locked: true,
+        locked: false,
         access: "shared"
       };
     });
