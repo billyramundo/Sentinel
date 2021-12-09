@@ -53,5 +53,5 @@ Sentinel Database
 ![image info](./User_Flow_Diagram.png)
 
 ## Architecture Diagram
-![image info](./architecture diagram.jpg)
+![image info](./architecture_diagram.jpg)
 
