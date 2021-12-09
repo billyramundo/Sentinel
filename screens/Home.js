@@ -120,7 +120,8 @@ function Home({ navigation }) {
       updatedList[code] = {
         name: doorSnapshot.child('nickname').val(),
         locked: true,
-        access: "owned"
+        access: "owned",
+        accessToken: doorSnapshot.child('access-token').val()
       };
     });
 
@@ -129,7 +130,8 @@ function Home({ navigation }) {
       updatedList[code] = {
         name: doorSnapshot.child('nickname').val(),
         locked: true,
-        access: "shared"
+        access: "shared",
+        accessToken: doorSnapshot.child('access-tokens/time-weekly-whitelist').val()
       };
     });
 

@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
-import { firebaseApp, database, localeTimeString, useDoorList } from "./Login";
-import { sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
+import { firebaseApp, database, localeTimeString, useDoorList, username } from "./Login";
+import { sentinelTheme, sentinelThemeLight, sentinelThemeDark, showToast } from "./Login";
 import { Platform, useColorScheme } from "react-native";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Swiper from 'react-native-swiper/src';
+import axios from "axios";
 
 import {
   View,
@@ -22,7 +23,8 @@ import {
   Icon,
   extendTheme,
   ScrollView,
-  Divider
+  Divider,
+  Toast
 } from "native-base"
 
 let swiperHeightPadding = 5;
@@ -47,43 +49,23 @@ function DoorControl({ navigation, route }) {
   function changeLockState() {
     const doorData = { ...doorList };
     const dataCopy = doorData;
-    dataCopy[doorCode].locked = !dataCopy[doorCode].locked;
-    setDoorList(dataCopy);
-    return false;
-    const password = "password";
-
-    if (lockstate_isLocked == true) {
-      setLockState(false);
-      setLockStateText("unlock");
-      var date = getDate();
-      const userID = auth.user.uid;
-      database.ref('users/' + userID + '/entrances/' + date).set({
-        door: "door id",
-        time: getTime()
+    const data = {};
+    data["username"] = username;
+    data["access-token"] = dataCopy[doorCode].accessToken;
+    axios.post("https://" + doorCode + ".tunnel.kundu.io/command/" +
+      (dataCopy[doorCode].locked === true ? "unlock" : "lock"), data)
+      .then(function (response) {
+        console.log(response);
+        dataCopy[doorCode].locked = !dataCopy[doorCode].locked;
+        setDoorList(dataCopy);
+        return false;
+      })
+      .catch(error => {
+        console.error(error);
+        showToast("You do not have access to this door", "error")
       });
 
-      axios
-        .post("https://p4qcydmk3c.tunnel.kundu.io/command/lock", {
-          username: username,
-          password: password,
-        })
-        .then(function (response) {
-          console.log(response);
-        });
-    }
-    if (lockstate_isLocked == false) {
-      setLockstate(true);
-      setLockStateText("lock");
-      axios
-        .post("https://p4qcydmk3c.tunnel.kundu.io/command/unlock", {
-          username: username,
-          password: password,
-        })
-        .then(function (response) {
-          console.log(response);
-        });
-    }
-  };
+  }
 
   const handleSetSwiperHeight = (value) => {
     if (value + swiperHeightPadding > swiperHeight) {
