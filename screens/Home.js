@@ -38,69 +38,54 @@ function makeObservable(target) {
   return { get, set, subscribe };
 }
 
-const doorListStore = makeObservable({
-  "p4qcydmk3c": {
-    name: "Front Door",
-    locked: false,
-    access: "owned"
-  },
-  "abcdefghi1": {
-    name: "Enoch Door 1",
-    locked: false,
-    access: "owned"
-  },
-  "door3": {
-    name: "Bedroom Door",
-    locked: false,
-    access: "owned"
-  },
-  "abcdefghi2": {
-    name: "Billy Door 1",
-    locked: true,
-    access: "shared"
-  },
-  "door5": {
-    name: "Enoch's Front Door",
-    locked: false,
-    access: "shared"
-  },
-  "door6": {
-    name: " Berkley's Suite",
-    locked: false,
-    access: "shared"
-  },
-  "door7": {
-    name: " Billy's Front Door",
-    locked: true,
-    access: "shared"
-  },
- });
+// const doorListStore = makeObservable({
+//   "p4qcydmk3c": {
+//     name: "Front Door",
+//     locked: false,
+//     access: "owned"
+//   },
+//   "abcdefghi1": {
+//     name: "Enoch Door 1",
+//     locked: false,
+//     access: "owned"
+//   },
+//   "door3": {
+//     name: "Bedroom Door",
+//     locked: false,
+//     access: "owned"
+//   },
+//   "abcdefghi2": {
+//     name: "Billy Door 1",
+//     locked: true,
+//     access: "shared"
+//   },
+//   "door5": {
+//     name: "Enoch's Front Door",
+//     locked: false,
+//     access: "shared"
+//   },
+//   "door6": {
+//     name: " Berkley's Suite",
+//     locked: false,
+//     access: "shared"
+//   },
+//   "door7": {
+//     name: " Billy's Front Door",
+//     locked: true,
+//     access: "shared"
+//   },
+//  });
+
+
+
+
+
+// const doorListStore = makeObservable( getRemoteDoorList() );
+const doorListStore = makeObservable( {} );
+
 
 function useDoorList() {
   return React.useState(doorListStore.get());
-}
-
-async function getRemoteDoorList() {
-  let doorsOwned = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/owned`).once("value").catch(error => {
-    console.error(error);
-  });
-  let doorsShared = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/shared`).once("value").then((snapshot) => {
-``
-  }).catch(error => {
-    console.error(error);
-  });
-  console.log(doors);
-  var updatedList = {};
-  doors.forEach(function(doorSnapshot) {
-    var code = doorSnapshot.key;
-    updatedList[code] = {
-      name: doorSnapshot.child('name').val(),
-      locked: true,
-      access: doorSnapshot.child('access').val()
-    };
-  });
-  console.log(updatedList);
-  return updatedList;
 }
 
 function Home({ navigation }) {
@@ -185,14 +170,51 @@ function Home({ navigation }) {
     )
   }
 
+  async function getRemoteDoorList() {
+    let doorsOwned = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/owned`).once("value").catch(error => {
+      console.error(error);
+    });
+    let doorsShared = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/shared`).once("value").catch(error => {
+      console.error(error);
+    });
+    console.log("hi Enoch");
+  
+    var updatedList = {};
+    doorsOwned.forEach(function(doorSnapshot) {
+      var code = doorSnapshot.key;
+      updatedList[code] = {
+        name: doorSnapshot.child('nickname').val(),
+        locked: true,
+        access: "owned"
+      };
+    });
+  
+    doorsShared.forEach(function(doorSnapshot) {
+      var code = doorSnapshot.key;
+      updatedList[code] = {
+        name: doorSnapshot.child('nickname').val(),
+        locked: true,
+        access: "shared"
+      };
+    });
+    
+   
+    console.log("updated List2")
+
+    setDoorList(updatedList);
+    return updatedList;
+  }
+
   React.useEffect(() => {
+    
     const unsubscribe = navigation.addListener('focus', () => {
       const doorData = {...doorList};
       const dataCopy = doorData;
       setDoorList(dataCopy);
+      getRemoteDoorList();
       //updateDoorList();
     });
-
+    
     return unsubscribe;
   }, [navigation]);
 
