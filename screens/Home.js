@@ -29,11 +29,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 function Home({ navigation }) {
   const colorMode = useColorScheme();
-  const [ doorList, setDoorList ] = useDoorList();
+  const [doorList, setDoorList] = useDoorList();
 
   const getDate = () => {
     var today = new Date();
-    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
     return date;
   };
   const getTime = () => {
@@ -53,10 +53,10 @@ function Home({ navigation }) {
     });
   }
   function generateDoorButtons(doorList, filterKey, filterVal) {
-    return Object.keys(doorList).filter(doorCode => doorList[doorCode][filterKey] === filterVal).map(doorCode => 
+    return Object.keys(doorList).filter(doorCode => doorList[doorCode][filterKey] === filterVal).map(doorCode =>
       <Pressable
         key={doorCode}
-        onPress={() => {navigation.navigate("Door Control", {doorCode: doorCode});}}
+        onPress={() => { navigation.navigate("Door Control", { doorCode: doorCode }); }}
         w="85%"
         mt="5%"
         mx="auto"
@@ -64,8 +64,8 @@ function Home({ navigation }) {
         borderColor={(doorList[doorCode].locked ? "locked" : "unlocked") + "." + (colorMode === 'dark' ? 'regular' : 'dark')}
         borderWidth="3"
         backgroundColor={(doorList[doorCode].locked ? "locked" : "unlocked") + "." + (colorMode === 'dark' ? 'background.dark' : 'regular')}
-        style={{cursor: 'pointer'}}
-        >
+        style={{ cursor: 'pointer' }}
+      >
         <Box
           style={{
             flex: 1,
@@ -76,7 +76,7 @@ function Home({ navigation }) {
           px="3"
           py="2"
           w="100%"
-          >
+        >
           <Box w="80%" h="100%" justifyContent="center">
             <Text numberOfLines={1} fontSize="md" textAlign="left" bold="1" color={colorMode === 'dark' ? '#fff' : '#000'}>
               {doorList[doorCode].name}
@@ -84,21 +84,21 @@ function Home({ navigation }) {
           </Box>
           <Box w="20%" h="100%" justifyContent="center">
             <Text textAlign="right">
-            {
-              doorList[doorCode].locked ?
-              <Icon
-                as={FontAwesome}
-                name="lock"
-                color={colorMode === 'dark' ? 'locked.regular' : 'locked.dark'}
-                size="md"
-              /> :
-              <Icon
-                as={FontAwesome}
-                name="unlock-alt"
-                color={colorMode === 'dark' ? 'unlocked.regular' : 'unlocked.dark'}
-                size="md"
-              />
-            }
+              {
+                doorList[doorCode].locked ?
+                  <Icon
+                    as={FontAwesome}
+                    name="lock"
+                    color={colorMode === 'dark' ? 'locked.regular' : 'locked.dark'}
+                    size="md"
+                  /> :
+                  <Icon
+                    as={FontAwesome}
+                    name="unlock-alt"
+                    color={colorMode === 'dark' ? 'unlocked.regular' : 'unlocked.dark'}
+                    size="md"
+                  />
+              }
             </Text>
           </Box>
         </Box>
@@ -113,9 +113,9 @@ function Home({ navigation }) {
     let doorsShared = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/shared`).once("value").catch(error => {
       console.error(error);
     });
-  
+
     var updatedList = {};
-    doorsOwned.forEach(function(doorSnapshot) {
+    doorsOwned.forEach(function (doorSnapshot) {
       var code = doorSnapshot.key;
       updatedList[code] = {
         name: doorSnapshot.child('nickname').val(),
@@ -123,38 +123,46 @@ function Home({ navigation }) {
         access: "owned"
       };
     });
-  
-    doorsShared.forEach(function(doorSnapshot) {
+
+    doorsShared.forEach(function (doorSnapshot) {
       var code = doorSnapshot.key;
       updatedList[code] = {
         name: doorSnapshot.child('nickname').val(),
-        locked: false,
+        locked: true,
         access: "shared"
       };
     });
 
+
+    for (const code of Object.keys(updatedList)) {
+      const resp = await axios.get("https://" + code + ".tunnel.kundu.io/status")
+      console.log(resp.data.locked)
+      const lockStatus = resp.data.locked
+      updatedList[code].locked = lockStatus
+    }
     setDoorList(updatedList);
     return updatedList;
   }
 
   React.useEffect(() => {
-    
+
     const unsubscribe = navigation.addListener('focus', () => {
       updateDoorList();
+
     });
-    
+
     return unsubscribe;
   }, [navigation]);
 
   return (
     <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <SafeAreaView flex={1} edges={['top', 'left', 'right']}>
-      <ScrollView mx="auto" w="100%" maxW="500" showsVerticalScrollIndicator={false}>
-        <Center mt="5">
-          {sentinelLogo()}
-        </Center>
-        <VStack space={3} mt="8" mb="8">
-          {/* <Center>
+        <ScrollView mx="auto" w="100%" maxW="500" showsVerticalScrollIndicator={false}>
+          <Center mt="5">
+            {sentinelLogo()}
+          </Center>
+          <VStack space={3} mt="8" mb="8">
+            {/* <Center>
             <Heading
               size="xl"
               fontWeight="600"
@@ -171,33 +179,33 @@ function Home({ navigation }) {
               Welcome, {firebase.auth().currentUser.displayName}!
             </Heading>
           </Center> */}
-          <Box mt="0" mb="5">
-            <Heading
-              size="lg"
-              fontWeight="600"
-              fontFamily="Avenir"
-              fontWeight="bold"
-              textAlign="left"
-              ml="5"
-              >
-              Your Doors
-            </Heading>
-            {generateDoorButtons(doorList, "access", "owned")}
-          </Box>
-          <Box mt="0" mb="5">
-            <Heading
+            <Box mt="0" mb="5">
+              <Heading
                 size="lg"
                 fontWeight="600"
                 fontFamily="Avenir"
                 fontWeight="bold"
                 textAlign="left"
                 ml="5"
-                >
+              >
+                Your Doors
+            </Heading>
+              {generateDoorButtons(doorList, "access", "owned")}
+            </Box>
+            <Box mt="0" mb="5">
+              <Heading
+                size="lg"
+                fontWeight="600"
+                fontFamily="Avenir"
+                fontWeight="bold"
+                textAlign="left"
+                ml="5"
+              >
                 Shared Doors
               </Heading>
-            {generateDoorButtons(doorList, "access", "shared")}
-          </Box>
-          {/* <Box mt="0" mb="5">
+              {generateDoorButtons(doorList, "access", "shared")}
+            </Box>
+            {/* <Box mt="0" mb="5">
             <Heading
               size="lg"
               fontWeight="600"
@@ -231,61 +239,61 @@ function Home({ navigation }) {
               </Button>
             </Center>
           </Box> */}
-          <Box>
-          <Heading
-            size="lg"
-            fontWeight="600"
-            fontFamily="Avenir"
-            fontWeight="bold"
-            textAlign="left"
-            mt="0"
-            ml="5"
-            >
-              Settings
+            <Box>
+              <Heading
+                size="lg"
+                fontWeight="600"
+                fontFamily="Avenir"
+                fontWeight="bold"
+                textAlign="left"
+                mt="0"
+                ml="5"
+              >
+                Settings
             </Heading>
-            <Center>
-              <Button mt="4" rounded="lg" onPress={() => {navigation.navigate("Register Door");}} backgroundColor="brandPrimary.regular">
-                <HStack>
-                  <Box justifyContent="center">
-                    <Text>
-                      <Icon
-                        as={FontAwesome5}
-                        name="map-marker-alt"
-                        color="white"
-                        size="xs"
-                      />
+              <Center>
+                <Button mt="4" rounded="lg" onPress={() => { navigation.navigate("Register Door"); }} backgroundColor="brandPrimary.regular">
+                  <HStack>
+                    <Box justifyContent="center">
+                      <Text>
+                        <Icon
+                          as={FontAwesome5}
+                          name="map-marker-alt"
+                          color="white"
+                          size="xs"
+                        />
+                      </Text>
+                    </Box>
+                    <Box justifyContent="center">
+                      <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                        Register Door
                     </Text>
-                  </Box>
-                  <Box justifyContent="center">
-                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
-                      Register Door
+                    </Box>
+                  </HStack>
+                </Button>
+                <Button mt="4" rounded="lg" onPress={onSignout} backgroundColor="danger.600">
+                  <HStack>
+                    <Box justifyContent="center">
+                      <Text>
+                        <Icon
+                          as={FontAwesome}
+                          name="sign-out"
+                          color="white"
+                          size="xs"
+                        />
+                      </Text>
+                    </Box>
+                    <Box justifyContent="center">
+                      <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                        Sign Out
                     </Text>
-                  </Box>
-                </HStack>
-              </Button>
-              <Button mt="4" rounded="lg" onPress={onSignout} backgroundColor="danger.600">
-                <HStack>
-                  <Box justifyContent="center">
-                    <Text>
-                      <Icon
-                        as={FontAwesome}
-                        name="sign-out"
-                        color="white"
-                        size="xs"
-                      />
-                    </Text>
-                  </Box>
-                  <Box justifyContent="center">
-                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
-                      Sign Out
-                    </Text>
-                  </Box>
-                </HStack>
-              </Button>
-            </Center>
-          </Box>
-        </VStack>
-      </ScrollView>
+                    </Box>
+                  </HStack>
+                </Button>
+              </Center>
+            </Box>
+          </VStack>
+        </ScrollView>
       </SafeAreaView>
     </NativeBaseProvider>
   );

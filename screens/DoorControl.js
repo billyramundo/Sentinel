@@ -27,7 +27,7 @@ import {
 
 let swiperHeightPadding = 5;
 
-function DoorControl ({ navigation, route }) {
+function DoorControl({ navigation, route }) {
   const colorMode = useColorScheme();
   const [doorList, setDoorList] = useDoorList();
   const [sharingData, setSharingData] = useState({});
@@ -45,7 +45,7 @@ function DoorControl ({ navigation, route }) {
   let cardBgColor = colorMode === 'dark' ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.3)";
 
   function changeLockState() {
-    const doorData = {...doorList};
+    const doorData = { ...doorList };
     const dataCopy = doorData;
     dataCopy[doorCode].locked = !dataCopy[doorCode].locked;
     setDoorList(dataCopy);
@@ -57,7 +57,7 @@ function DoorControl ({ navigation, route }) {
       setLockStateText("unlock");
       var date = getDate();
       const userID = auth.user.uid;
-      database.ref('users/' + userID + '/entrances/' + date ).set({
+      database.ref('users/' + userID + '/entrances/' + date).set({
         door: "door id",
         time: getTime()
       });
@@ -96,160 +96,159 @@ function DoorControl ({ navigation, route }) {
       setSwiperRenderReady(false);
       const newSharingData = {};
       database.ref(`/doors/${doorCode}/access`).once('value', snapshot => {
-        snapshot.forEach(function(result) {
+        snapshot.forEach(function (result) {
           let recipientUid = result.key;
-          newSharingData[recipientUid] = Array.from({...result.child('time-weekly-whitelist/access-data').val(), length:7});
+          newSharingData[recipientUid] = Array.from({ ...result.child('time-weekly-whitelist/access-data').val(), length: 7 });
         });
       })
-      .then(async function() {
-        setSharingData(newSharingData);
-        
-        let newRecipientUsernames = {};
-        for (const uid of Object.keys(newSharingData)) {
-          await firebase.database().ref(`/users/public/${uid}/username`).once('value', snapshot => {
-            newRecipientUsernames[uid] = snapshot.val();
-          });
-        }
-        setRecipientUsernames(newRecipientUsernames);
-        setSwiperRenderReady(true);
-      });
+        .then(async function () {
+          setSharingData(newSharingData);
+
+          let newRecipientUsernames = {};
+          for (const uid of Object.keys(newSharingData)) {
+            await firebase.database().ref(`/users/public/${uid}/username`).once('value', snapshot => {
+              newRecipientUsernames[uid] = snapshot.val();
+            });
+          }
+          setRecipientUsernames(newRecipientUsernames);
+          setSwiperRenderReady(true);
+        });
     });
 
     return unsubscribe;
   }, [navigation]);
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  function displayWeeklyAccess(uid){
+  function displayWeeklyAccess(uid) {
     let accessTimes = uid in sharingData ? sharingData[uid] : Array(7).fill(undefined);
     return (
       <>
-      <Box>
-        <Text
-          color={textColor}
-          fontWeight="bold"
-          fontSize="lg"
-          mx="auto"
+        <Box>
+          <Text
+            color={textColor}
+            fontWeight="bold"
+            fontSize="lg"
+            mx="auto"
           >
-          {uid in recipientUsernames ? recipientUsernames[uid]  + "'s Access" : "Loading..."}
-        </Text>
-      </Box>
-      <Divider bg={bgColor} h="2px" mt="3" mb="3"></Divider>
-      <Box mt="1">
-        {
-          daysOfWeek.map((day, index) => {
-            let timeStr = "Loading...";
-            if(Object.keys(sharingData).length > 0)
-            {
-              if(accessTimes[index] == undefined) {
-                timeStr = "No Access";
+            {uid in recipientUsernames ? recipientUsernames[uid] + "'s Access" : "Loading..."}
+          </Text>
+        </Box>
+        <Divider bg={bgColor} h="2px" mt="3" mb="3"></Divider>
+        <Box mt="1">
+          {
+            daysOfWeek.map((day, index) => {
+              let timeStr = "Loading...";
+              if (Object.keys(sharingData).length > 0) {
+                if (accessTimes[index] == undefined) {
+                  timeStr = "No Access";
+                }
+                else {
+                  let startTimeHHmm = accessTimes[index].substring(0, 4)
+                  let endTimeHHmm = accessTimes[index].substring(5, 9);
+                  timeStr = localeTimeString(startTimeHHmm) + " - " + localeTimeString(endTimeHHmm);
+                }
               }
-              else {
-                let startTimeHHmm = accessTimes[index].substring(0, 4)
-                let endTimeHHmm = accessTimes[index].substring(5, 9);
-                timeStr = localeTimeString(startTimeHHmm) + " - " + localeTimeString(endTimeHHmm);
-              }
-            }
-            return (
-            <HStack key={day}>
-              <Text color={textColor} fontSize="sm" w="35%" fontWeight="medium">{day}</Text>
-              <Text color={textColor} fontSize="sm" w="65%" textAlign="right">{timeStr}</Text>
-            </HStack>
-            );
-          })
-        }
-      </Box>
+              return (
+                <HStack key={day}>
+                  <Text color={textColor} fontSize="sm" w="35%" fontWeight="medium">{day}</Text>
+                  <Text color={textColor} fontSize="sm" w="65%" textAlign="right">{timeStr}</Text>
+                </HStack>
+              );
+            })
+          }
+        </Box>
       </>
     );
   }
 
   function addAccessCard() {
     return (
-    <View
-      key="addAccess"
-      onLayout={(event) => handleSetSwiperHeight(event.nativeEvent.layout.height)}
-      my="auto"
+      <View
+        key="addAccess"
+        onLayout={(event) => handleSetSwiperHeight(event.nativeEvent.layout.height)}
+        my="auto"
       >
-      <Box
-        margin="auto"
-        justifyContent="center"
-        px="2"
-        w="80%">
         <Box
-          rounded="xl"
           margin="auto"
-          px="4"
-          pt="4"
-          pb="5"
-          w="100%"
-          backgroundColor={cardBgColor}
+          justifyContent="center"
+          px="2"
+          w="80%">
+          <Box
+            rounded="xl"
+            margin="auto"
+            px="4"
+            pt="4"
+            pb="5"
+            w="100%"
+            backgroundColor={cardBgColor}
           >
-          <Box>
-            <Text
-              color={textColor}
-              fontWeight="bold"
-              fontSize="lg"
-              mx="auto"
+            <Box>
+              <Text
+                color={textColor}
+                fontWeight="bold"
+                fontSize="lg"
+                mx="auto"
               >
-              Share This Door
+                Share This Door
             </Text>
-          </Box>
-          <Box mt="3">
-            <Center>
-              <Button
-              rounded="lg"
-              onPress={() => {navigation.navigate("Door Sharing", {doorCode: doorCode});}}
-              backgroundColor={bgColor}
-              >
-                <HStack>
-                  <Box justifyContent="center">
-                    <Text>
-                      <Icon
-                        as={FontAwesome5}
-                        name="user-plus"
-                        color={textColor}
-                        size="xs"
-                      />
+            </Box>
+            <Box mt="3">
+              <Center>
+                <Button
+                  rounded="lg"
+                  onPress={() => { navigation.navigate("Door Sharing", { doorCode: doorCode }); }}
+                  backgroundColor={bgColor}
+                >
+                  <HStack>
+                    <Box justifyContent="center">
+                      <Text>
+                        <Icon
+                          as={FontAwesome5}
+                          name="user-plus"
+                          color={textColor}
+                          size="xs"
+                        />
+                      </Text>
+                    </Box>
+                    <Box justifyContent="center">
+                      <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color={textColor}>
+                        Add Access Rule
                     </Text>
-                  </Box>
-                  <Box justifyContent="center">
-                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color={textColor}>
-                      Add Access Rule
+                    </Box>
+                  </HStack>
+                </Button>
+              </Center>
+            </Box>
+            <Box mt="3">
+              <Center>
+                <Button
+                  rounded="lg"
+                  onPress={() => { navigation.navigate("Door Sharing", { doorCode: doorCode, recipientIsOwner: true }); }}
+                  backgroundColor={colorMode === 'dark' ? "brandPrimary.dark" : "brandPrimary.light"}
+                >
+                  <HStack>
+                    <Box justifyContent="center">
+                      <Text>
+                        <Icon
+                          as={FontAwesome5}
+                          name="key"
+                          color={textColor}
+                          size="xs"
+                        />
+                      </Text>
+                    </Box>
+                    <Box justifyContent="center">
+                      <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color={textColor}>
+                        Add Door Owner
                     </Text>
-                  </Box>
-                </HStack>
-              </Button>
-            </Center>
-          </Box>
-          <Box mt="3">
-            <Center>
-              <Button
-              rounded="lg"
-              onPress={() => {navigation.navigate("Door Sharing", {doorCode: doorCode, recipientIsOwner: true});}}
-              backgroundColor={colorMode === 'dark' ? "brandPrimary.dark" : "brandPrimary.light"}
-              >
-                <HStack>
-                  <Box justifyContent="center">
-                    <Text>
-                      <Icon
-                        as={FontAwesome5}
-                        name="key"
-                        color={textColor}
-                        size="xs"
-                      />
-                    </Text>
-                  </Box>
-                  <Box justifyContent="center">
-                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color={textColor}>
-                      Add Door Owner
-                    </Text>
-                  </Box>
-                </HStack>
-              </Button>
-            </Center>
+                    </Box>
+                  </HStack>
+                </Button>
+              </Center>
+            </Box>
           </Box>
         </Box>
-      </Box>
-    </View>
+      </View>
     )
   }
   function getSharingCards() {
@@ -257,12 +256,12 @@ function DoorControl ({ navigation, route }) {
       return (
         <View key={recipientUid}
           onLayout={(event) => handleSetSwiperHeight(event.nativeEvent.layout.height)}
-          >
-          <Box 
+        >
+          <Box
             margin="auto"
             px="2"
             w="80%"
-            >
+          >
             <Box
               rounded="xl"
               margin="auto"
@@ -273,14 +272,14 @@ function DoorControl ({ navigation, route }) {
               backgroundColor={cardBgColor}
               borderColor={fgColor}
               borderWidth={0}
-              >
+            >
               {displayWeeklyAccess(recipientUid)}
               <Box mt="5">
                 <Center>
                   <Button
-                  rounded="lg"
-                  onPress={() => {navigation.navigate("Door Sharing", {doorCode: doorCode, recipientUid: recipientUid});}}
-                  backgroundColor={bgColor}
+                    rounded="lg"
+                    onPress={() => { navigation.navigate("Door Sharing", { doorCode: doorCode, recipientUid: recipientUid }); }}
+                    backgroundColor={bgColor}
                   >
                     <HStack>
                       <Box justifyContent="center">
@@ -313,14 +312,14 @@ function DoorControl ({ navigation, route }) {
     return (
       <Box w="100%">
         <Swiper
-        height={swiperHeight}
-        showsButtons={true}
-        loop={false}
-        w="100%"
-        dotStyle={{display: 'none'}}
-        activeDotStyle={{display: 'none'}}
-        prevButton={(<Text style={{color: fgColor}} fontSize="5xl">‹</Text>)}
-        nextButton={(<Text style={{color: fgColor}} fontSize="5xl">›</Text>)}
+          height={swiperHeight}
+          showsButtons={true}
+          loop={false}
+          w="100%"
+          dotStyle={{ display: 'none' }}
+          activeDotStyle={{ display: 'none' }}
+          prevButton={(<Text style={{ color: fgColor }} fontSize="5xl">‹</Text>)}
+          nextButton={(<Text style={{ color: fgColor }} fontSize="5xl">›</Text>)}
         >
           {[...getSharingCards(), addAccessCard()].map((el) => el)}
         </Swiper>
@@ -340,7 +339,7 @@ function DoorControl ({ navigation, route }) {
             mx="auto"
             showsVerticalScrollIndicator={false}
             flex={1} flexDirection="column"
-            >
+          >
             <Box safeArea w="100%">
               <Center>
                 <Heading
@@ -350,7 +349,7 @@ function DoorControl ({ navigation, route }) {
                   fontWeight="black"
                   color={fgColor}
                   textAlign="center"
-                  >
+                >
                   {doorList[doorCode].name}
                 </Heading>
                 <Box safeArea w="100%" maxW="400">
@@ -365,7 +364,7 @@ function DoorControl ({ navigation, route }) {
                       rounded="full"
                       onPress={changeLockState}
                       backgroundColor="transparent"
-                      >
+                    >
                       <Text>
                         <Icon
                           as={FontAwesome}
@@ -380,21 +379,21 @@ function DoorControl ({ navigation, route }) {
               </Center>
             </Box>
             {
-            swiperRenderReady ?
-            <Box>
-              <Heading
-                mb={5}
-                size="lg"
-                fontFamily="Avenir"
-                fontWeight="black"
-                color={fgColor}
-                textAlign="center"
-                >
-                Door Sharing
+              swiperRenderReady ?
+                <Box>
+                  <Heading
+                    mb={5}
+                    size="lg"
+                    fontFamily="Avenir"
+                    fontWeight="black"
+                    color={fgColor}
+                    textAlign="center"
+                  >
+                    Door Sharing
               </Heading>
-              {renderSwiper()}
-            </Box> :
-            null
+                  {renderSwiper()}
+                </Box> :
+                null
             }
           </ScrollView>
         </SafeAreaView>
