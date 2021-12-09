@@ -48,3 +48,4 @@ Sentinel Database
 - public
   - user-id
     - username: username
+## Front-End User Flow Diagram
