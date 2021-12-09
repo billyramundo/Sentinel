@@ -1,5 +1,7 @@
 ## Overall Architecture Design
+![image info](./architecture_diagram.jpg)
 Justification
+
 ## Database Structure
 Justification for Firebase rules:
 
@@ -51,7 +53,3 @@ Sentinel Database
 
 ## Front-End User Flow Diagram
 ![image info](./User_Flow_Diagram.png)
-
-## Architecture Diagram
-![image info](./architecture_diagram.jpg)
-
