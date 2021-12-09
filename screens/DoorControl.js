@@ -1,11 +1,8 @@
 import React, { useState } from "react";
-import { styles } from "../Styles";
-import SearchField from "react-search-field";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
-import { firebaseApp, database, localeTimeString } from "./Login";
-import { useDoorList } from "./Home";
+import { firebaseApp, database, localeTimeString, useDoorList } from "./Login";
 import { sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
 import { Platform, useColorScheme } from "react-native";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";

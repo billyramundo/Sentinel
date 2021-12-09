@@ -4,6 +4,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useBetween } from "use-between";
 
 import {
   Box,
@@ -172,6 +173,18 @@ const localeTimeString = (time_HHmm) => {
     localeTimeString = localeTimeString.replace(/:\d\d(?: |$)/, ' ').trim();
   }
   return localeTimeString;
+}
+
+const useDoorListState = () => {
+  const [doorList, setDoorList] = useState({});
+  return {
+    doorList,
+    setDoorList
+  }
+}
+const useDoorList = () => {
+  const { doorList, setDoorList } = useBetween(useDoorListState);
+  return [doorList, setDoorList];
 }
 
 function Login({ navigation }) {
@@ -424,3 +437,4 @@ export { sentinelThemeDark };
 export { showToast, closeAllToasts };
 export { localeTimeString };
 export { ACCESS_TOKEN_LENGTH };
+export { useDoorList };

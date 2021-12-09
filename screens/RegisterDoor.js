@@ -3,8 +3,11 @@ import logo from "../assets/logo.png";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
-import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
+import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark, ACCESS_TOKEN_LENGTH } from "./Login";
 import { FontAwesome5 } from "@expo/vector-icons";
+import 'react-native-get-random-values';
+import { nanoid } from 'nanoid';
+// import TimezoneSelect from "react-timezone-select";
 
 import {
   Box,
@@ -31,101 +34,59 @@ function RegisterDoor({ navigation }) {
   var [formData, setData] = useState({});
   var [formErrors, setErrors] = useState({});
   const [attemptingSubmit, setAttemptingSubmit] = useState(false);
+  const [timezone, setTimezone] = useState(
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 
   async function validate() {
-    formErrors = {};
-
-    let shouldReturnFalse = false;
     if (!('code' in formData) || formData.code.length === 0) {
-      setErrors({
-        ...formErrors,
-        code: 'Code is required',
-      });
+      setErrors({code: 'Code is required'});
       return false;
     } else if (formData.code.length < 10) {
-      setErrors({
-        ...formErrors,
-        code: 'Code must be 10 characters',
-      });
+      setErrors({code: 'Code must be 10 characters'});
       return false;
     }
 
     if (!('name' in formData) || formData.name.length === 0) {
-      setErrors({
-        ...formErrors,
-        name: 'A name is required',
-      });
+      setErrors({name: 'A name is required'});
       return false;
     }
+
+    // if (selectedTimezone == undefined || selectedTimezone.value == undefined || selectedTimezone.value.length == 0) {
+    //   setErrors({timeZone: 'A time zone is required'});
+    //   return false;
+    // }
 
     let code = formData.code.toLowerCase();
-  
-    // Attempt to create door
     let uid = firebase.auth().currentUser.uid;
-    let data = {};
-    data[uid] = true;
-    await firebase.database().ref(`/doors/${code}/owners`).set(data).catch(error => {
-      if (error.code.toUpperCase() === 'PERMISSION_DENIED') {
-        setErrors({
-          ...formErrors,
-          code: 'This door has already been registered.',
-        });
-        shouldReturnFalse = true;
-        return false;
-      }
-      console.error(error.code);
-      console.error(error);
   
-      // Do not validate
-      shouldReturnFalse = true;
-      return false;
-    });
-    if(shouldReturnFalse) {
-      return false;
-    }
-
-    data = {};
-    data[code] = true;
-    // Add door to user's list of owned doors
-    await firebase.database().ref(`/users/access/${uid}/owned`).update(data).catch(error => {
+    // Attempt to create door (and set access tokens for owner)
+    try {
+      let accessToken = nanoid(ACCESS_TOKEN_LENGTH);
+      await firebase.database().ref(`/doors/${code}/owners/${uid}/access-token`).set(accessToken);
+      await firebase.database().ref(`/users/access/${uid}/owned/${code}/access-token`).set(accessToken);
+      console.log("Generated & saved new access token");
+      accessToken = undefined;
+    } catch(error) {
+      console.error(error);
+      console.error(error.code);
       if (error.code.toUpperCase() === 'PERMISSION_DENIED') {
-        setErrors({
-          ...formErrors,
-          code: 'An error occurred',
-        });
-        shouldReturnFalse = true;
+        setErrors({code: 'This door is not eligible for registration.'});
         return false;
       }
-      console.error(error.code);
-      console.error(error);
-
-      // Do not validate
-      shouldReturnFalse = true;
-      return false;
-    });
-    if(shouldReturnFalse) {
       return false;
     }
 
     // Add nickname for door
-    await firebase.database().ref(`/users/access/${uid}/owned/${code}`).update({nickname: formData.name}).catch(error => {
+    try {
+      await firebase.database().ref(`/users/access/${uid}/owned/${code}/nickname`).set(formData.name);
+    } catch (error) {
+      console.error(error);
+      console.error(error.code);
       if (error.code.toUpperCase() === 'PERMISSION_DENIED') {
-        setErrors({
-          ...formErrors,
-          code: 'An error occurred',
-        });
-        shouldReturnFalse = true;
+        setErrors({code: 'An error occurred setting the nickname for the door!'});
         return false;
       }
-      console.error(error.code);
-      console.error(error);
-  
-      // Do not validate
-      shouldReturnFalse = true;
-      return false;
-    });
-    if(shouldReturnFalse) {
-      return false;
     }
 
     return true;
@@ -218,6 +179,14 @@ function RegisterDoor({ navigation }) {
                 <FormControl.HelperText>A name for this door, e.g., "Front Door"</FormControl.HelperText>
                 <FormControl.ErrorMessage>{formErrors.name}</FormControl.ErrorMessage>
               </FormControl>
+              {/* <FormControl isRequired isInvalid={'timeZone' in formErrors}>
+                <TimezoneSelect
+                  value={selectedTimezone}
+                  onChange={setSelectedTimezone}
+                />
+                <FormControl.HelperText>The Time Zone in which this door is located</FormControl.HelperText>
+                <FormControl.ErrorMessage>{formErrors.timeZone}</FormControl.ErrorMessage>
+              </FormControl> */}
               <Center>
                 <Button mt="7" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
                   <HStack display="flex" flexDirection="row" h="7">

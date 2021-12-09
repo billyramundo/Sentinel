@@ -31,7 +31,7 @@
     "react-native-svg": "12.1.1",
     "react-native-swiper": "^1.6.0",
     "react-native-web": "~0.13.12",
-    "react-search-field": "^2.0.1"
+    "use-between": "^1.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"

@@ -6,7 +6,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
-import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark } from "./Login";
+import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark, useDoorList } from "./Login";
 
 import {
   Box,
@@ -27,74 +27,10 @@ import {
 import { useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Witchcraft from https://stackoverflow.com/a/62002044
-function makeObservable(target) {
-  let listeners = [];
-  let value = target;
-  function get() { return value; }
-  function set(newValue) { if (value === newValue) return; value = newValue; listeners.forEach((l) => l(value)); }
-  function subscribe(listenerFunc) { listeners.push(listenerFunc); return () => unsubscribe(listenerFunc); }
-  function unsubscribe(listenerFunc) { listeners = listeners.filter((l) => l !== listenerFunc); }
-  return { get, set, subscribe };
-}
-
-// const doorListStore = makeObservable({
-//   "p4qcydmk3c": {
-//     name: "Front Door",
-//     locked: false,
-//     access: "owned"
-//   },
-//   "abcdefghi1": {
-//     name: "Enoch Door 1",
-//     locked: false,
-//     access: "owned"
-//   },
-//   "door3": {
-//     name: "Bedroom Door",
-//     locked: false,
-//     access: "owned"
-//   },
-//   "abcdefghi2": {
-//     name: "Billy Door 1",
-//     locked: true,
-//     access: "shared"
-//   },
-//   "door5": {
-//     name: "Enoch's Front Door",
-//     locked: false,
-//     access: "shared"
-//   },
-//   "door6": {
-//     name: " Berkley's Suite",
-//     locked: false,
-//     access: "shared"
-//   },
-//   "door7": {
-//     name: " Billy's Front Door",
-//     locked: true,
-//     access: "shared"
-//   },
-//  });
-
-
-
-
-
-// const doorListStore = makeObservable( getRemoteDoorList() );
-const doorListStore = makeObservable( {} );
-
-
-function useDoorList() {
-  return React.useState(doorListStore.get());
-}
-
 function Home({ navigation }) {
   const colorMode = useColorScheme();
-  const [doorList, setDoorList] = useDoorList();
+  const [ doorList, setDoorList ] = useDoorList();
 
-  // let remoteDoorList = getRemoteDoorList();
-  // setDoorList(remoteDoorList});
-  
   const getDate = () => {
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
@@ -170,21 +106,20 @@ function Home({ navigation }) {
     )
   }
 
-  async function getRemoteDoorList() {
+  async function updateDoorList() {
     let doorsOwned = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/owned`).once("value").catch(error => {
       console.error(error);
     });
     let doorsShared = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/shared`).once("value").catch(error => {
       console.error(error);
     });
-    console.log("hi Enoch");
   
     var updatedList = {};
     doorsOwned.forEach(function(doorSnapshot) {
       var code = doorSnapshot.key;
       updatedList[code] = {
         name: doorSnapshot.child('nickname').val(),
-        locked: false,
+        locked: true,
         access: "owned"
       };
     });
@@ -197,9 +132,6 @@ function Home({ navigation }) {
         access: "shared"
       };
     });
-    
-   
-    console.log("updated List2")
 
     setDoorList(updatedList);
     return updatedList;
@@ -208,11 +140,7 @@ function Home({ navigation }) {
   React.useEffect(() => {
     
     const unsubscribe = navigation.addListener('focus', () => {
-      const doorData = {...doorList};
-      const dataCopy = doorData;
-      setDoorList(dataCopy);
-      getRemoteDoorList();
-      //updateDoorList();
+      updateDoorList();
     });
     
     return unsubscribe;
@@ -364,4 +292,3 @@ function Home({ navigation }) {
 }
 
 export default Home;
-export { useDoorList };

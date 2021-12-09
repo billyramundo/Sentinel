@@ -7,7 +7,6 @@ import Login from "./screens/Login";
 import CreateAccount from "./screens/CreateAccount";
 import Home from "./screens/Home";
 import DoorControl from "./screens/DoorControl";
-import Friends from "./screens/Friends";
 import RegisterDoor from "./screens/RegisterDoor"
 import AccessRule from "./screens/AccessRule";
 import { sentinelTheme } from "./screens/Login";
@@ -41,7 +40,6 @@ export default function App() {
         <Stack.Screen name="Create Account" component={CreateAccount} options={{headerShadowVisible: false, headerTintColor: colorMode === 'dark' ? '#fff' : "#000"}} />
         <Stack.Screen name="Home" component={Home} options={{headerShown: false}} />
         <Stack.Screen name="Door Control" component={DoorControl} options={{title: null, headerShadowVisible: false, headerBackTitleVisible: false, headerTransparent: true, headerTintColor: colorMode === 'dark' ? '#fff' : "#000"}} />
-        <Stack.Screen name="Friends" component={Friends} />
         <Stack.Screen name="Register Door" component={RegisterDoor} options={{headerShadowVisible: false, headerTintColor: colorMode === 'dark' ? '#fff' : "#000"}} />
         <Stack.Screen name="Door Sharing" component={AccessRule} options={{headerShadowVisible: false, headerBackTitleVisible: false, headerTintColor: colorMode === 'dark' ? '#fff' : "#000"}} />
       </Stack.Navigator>
