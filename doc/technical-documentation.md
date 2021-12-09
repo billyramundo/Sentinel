@@ -1,7 +1,7 @@
-## Overal Architecture Design
-
+## Overall Architecture Design
+Justification
 ## Database Structure
-
+Justification
 Sentinel Database
 - door-activation
   - door-id: activation-status
