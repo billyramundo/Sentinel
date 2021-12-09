@@ -49,5 +49,4 @@ Sentinel Database
   - user-id
     - username: username
 ## Front-End User Flow Diagram
-- User flow diagram attatched in docs folder. 
 ![image info](./User_Flow_Diagram.png)
