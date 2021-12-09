@@ -5,11 +5,32 @@ To change database information, one would need to be granted ownership access to
 The web infrastructure is expandable and allows for, say, switching to another domain instead of tunnel.kundu.io in the future. If these things were changed, which is unlikely, because they are inextricably linked in the source code, it would be by means of an update. 
 
 ## Open Source Tools and Libraries
-Back end: pyrebase, flask, localtunnel
+#### Front end
+- axios, 0.23.0, https://github.com/axios/axios/blob/master/LICENSE
+- Expo-status-bar, 1.0.4, https://github.com/expo/expo/blob/master/LICENSE
+- expo/vector-icons, 1.0.4, https://github.com/expo/expo/blob/master/LICENSE
+- React, 16.13.1, https://github.com/facebook/react/blob/main/LICENSE, 
+- Native-base, 3.2.2, https://github.com/GeekyAnts/NativeBase/blob/master/LICENSE, 
+- React-native, 0.63.2, https://github.com/facebook/react-native/blob/main/LICENSE, 
+- React-navigation, 6.0.11, https://github.com/react-navigation/react-navigation/blob/main/packages/drawer/LICENSE, 
+- React-native-modal-datetime-picker, 10.2.0, https://github.com/mmazzarolo/react-native-modal-datetime-picker/blob/master/LICENSE.md
+- React-native-get-random-values, 1.7.1, https://github.com/LinusU/react-native-get-random-values
+- Nanoid, 3.1.30, https://github.com/ai/nanoid/blob/main/LICENSE
+- React-native-swiper, 1.6.0, https://github.com/leecade/react-native-swiper/blob/master/LICENSE
+- React-native-screens, 3.4.0, https://github.com/software-mansion/react-native-screens/blob/main/LICENSE
+- Use-between, 1.0.1, https://github.com/betula/use-between/blob/master/LICENSE
 
-Database: firebase
 
-Front end: axios, expo-status-bar, react, react-native, react-navigation, react-native-modal-datetime-picker, react-native-get-random-values, nanoid, expo/vector-icons, react-native-swiper, react-native-screens, use-between
+
+#### Database 
+- firebase, 8.2.3, https://opensource.google/projects/firebase-sdk
+
+#### Backend
+- pyrebase, 4.5.0, https://libraries.io/pypi/Pyrebase
+- Flask, 2.0.2, http://matrix.umcs.lublin.pl/DOC/python-flask-doc/html/license.html#:~:text=Flask%20is%20licensed%20under%20a,and%20the%20disclaimer%20is%20present.
+- Localtunnel, 2.0.2, https://github.com/progrium/localtunnel/blob/master/LICENSE
+
+
 
 ## Installation Instructions
 To install and run our application, follow the following steps:
