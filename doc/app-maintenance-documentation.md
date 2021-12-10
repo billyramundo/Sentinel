@@ -1,22 +1,22 @@
 ## Install Instructions
 To install and run our application, follow the following steps:
-1. Install Node version 14.18.1
-2. Install npm version 8.1.1
-3. In your console, run 'npm install --global expo-cli'
-4. Download our codebase
-5. Navigate to the code folder on your local machine and run 'npm install' to install all of the necessary libraries
-6. Now, run 'npm start' in the code folder to launch the Expo Metro Bundler
-7. Here, you can chose to launch the application in the web, an ios or andriod simulator, or locally on your phone
+1. Install Node.js version 14.18.1
+2. Install Node Package Manager (npm) version 8.1.1
+3. In your console, run `npm install --global expo-cli`
+4. Clone this repository
+5. Navigate to the cloned directory on your local machine and run `npm install` to install all of the necessary libraries
+6. Now, run `npm start` in the cloned directory to launch the Expo Metro Bundler
+7. Here, you can chose to launch the application on the web, on an iOS or Android simulator, or locally, on your own phone
 
 Running Locally:
-- If you would like to run the application locally on your phone:
-1. Download the ExpoGo application from the App store
-2. Run 'npm start' to navigate to the Expo Metro Bundler
-3. On your phone, scan the QR code on the Metro Bundler webpage, and click the link that pops up. This will launch the app in the ExpoGo application. 
+- If you would like to run the application locally, on your phone:
+  1. Download the [Expo Go](https://expo.dev/client) application from the App store
+  2. Run `npm start` to launch the Expo Metro Bundler
+  3. On your phone, scan the QR code on the Metro Bundler webpage, and click the link that pops up. This will launch the app in the Expo Go application. 
 
 ## Update or Change Key Non-Programming Components
 To change database information, one would need to be granted ownership access to our Firebase Sentinel database linked here: https://console.firebase.google.com/u/1/project/sentinel-a6249/overview. We cannot display the actual account information, as the databse is accessed through a team member's Google account, which is why we would grant ownership to new programmmers instead. Then, they would be able to change both the rules and the information stored here. 
-The web infrastructure is expandable and allows for, say, switching to another domain instead of tunnel.kundu.io in the future. If these things were changed, which is unlikely, because they are inextricably linked in the source code, it would be by means of an update. The current IP address of the routing server is 143.244.202.43 . Contact 917-696-8150 for any further questions.
+The web infrastructure is expandable and allows for, say, switching to another domain instead of the current one (`https://tunnel.kundu.io`) in the future. If these things were changed, which is unlikely, because they are inextricably linked in source code, it would be by means of an app update (if distributed on the App Store). The current IPv4 address of the routing server is `143.244.202.43`. Contact [isabel.garfinkel@duke.edu](mailto:isabel.garfinkel@duke.edu) for any further questions.
 
 ## Open Source Tools and Libraries
 #### Front end
@@ -34,12 +34,10 @@ The web infrastructure is expandable and allows for, say, switching to another d
 - React-native-screens, 3.4.0, https://github.com/software-mansion/react-native-screens/blob/main/LICENSE
 - Use-between, 1.0.1, https://github.com/betula/use-between/blob/master/LICENSE
 
-
-
 #### Database 
 - firebase, 8.2.3, https://opensource.google/projects/firebase-sdk
 #### Backend
 - pyrebase, 4.5.0, https://libraries.io/pypi/Pyrebase
 - Flask, 2.0.2, http://matrix.umcs.lublin.pl/DOC/python-flask-doc/html/license.html#:~:text=Flask%20is%20licensed%20under%20a,and%20the%20disclaimer%20is%20present.
 - Localtunnel, 2.0.2, https://github.com/progrium/localtunnel/blob/master/LICENSE
-
+- See the [Backend Repo README](https://coursework.cs.duke.edu/compsci390_2021fall/sentinal/device-backend/-/blob/documentation/README.md) for more information on dependencies and installation instructions
