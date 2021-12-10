@@ -31,7 +31,7 @@ Private and Public Table:
 These two tables are built for expandability. These tables would store information about each user like their username, email, phone number, etc. Any data in the public table would be accessible by search. This would help with the expansion of friends features which we have in our backlog.
 
 
-Sentinel Database
+**Sentinel Database**
 - door-activation
   - door-id: activation-status
 - doors
