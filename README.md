@@ -11,9 +11,9 @@
 
 ## Instructions For Deployment
 **Please note:** Detailed installation/deployment instructions are available in [`doc/app-maintenance-documentation.md`](doc/app-maintenance-documentation.md).
-### Front End
+### Front-End
 For the front end, one would need to set up `node`, `npm`, and `expo`. Then, you would need to create a Firebase realtime database and connect the frontend to the new database by simply replacing the `config` variable in `screens/Login.js`.
-### Backend
+### Back-End
 For the backend, one would need to set up `Python` and install `pyrebase`, `Flask`, and `flask-cors`. `Localtunnel` client must also be installed. Finally, the backend database config variable would need to be replaced with the new Firebase realtime database's config, exactly as was done in the frontend.
 ### Hardware
 In order to set up the hardware, one would simply need to follow the instructions included in the box, which merely entails doing the following:
