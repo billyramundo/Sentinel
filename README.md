@@ -15,4 +15,4 @@ For the front end, one would need to set up node, npm, and expo (detailed instru
 **insert hardware instructions**
 
 ## Backend Repo
-Our backend code is in the Sentinel  Repo linked here: https://coursework.cs.duke.edu/compsci390_2021fall/sentinal
+Our backend code is in the Sentinel Repo linked here: https://coursework.cs.duke.edu/compsci390_2021fall/sentinal
