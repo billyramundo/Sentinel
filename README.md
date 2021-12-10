@@ -13,3 +13,6 @@ Introducing Sentinel: Our goal is to allow students to control their door from a
 For the front end, one would need to set up node, npm, and expo (detailed instructions for this in installation instructions). Then, you would need to create a Firebase realtime database and place the database's config in the code in order to connect it to the front end. For the backend, one would need to set up Flask, request, and jsonify from flask; CORS and cross_origin from flask_cors; datetime from datetime; and tunnel_handler, sys, os, pyrebase, subprocess, re, json, signal, psutil, and time. Then you would need to place the database's config in the code in order to connect the database to the backend. 
 
 **insert hardware instructions**
+
+## Backend Repo
+Our backend code is in the Sentinel  Repo linked here: https://coursework.cs.duke.edu/compsci390_2021fall/sentinal
