@@ -54,18 +54,17 @@ function DoorControl({ navigation, route }) {
     data["username"] = username;
     data["access-token"] = dataCopy[doorCode].accessToken;
     axios.post("https://" + doorCode + ".tunnel.kundu.io/command/" +
-      (dataCopy[doorCode].locked === true ? "unlock" : "lock"), data)
-      .then(function (response) {
-        console.log(response);
-        dataCopy[doorCode].locked = !dataCopy[doorCode].locked;
-        setDoorList(dataCopy);
-        return false;
-      })
-      .catch(error => {
-        console.error(error);
-        showToast("You do not have access to this door", "error")
-      });
-
+    (dataCopy[doorCode].locked === true ? "unlock" : "lock"), data)
+    .then(function (response) {
+      console.log(response);
+      dataCopy[doorCode].locked = !dataCopy[doorCode].locked;
+      setDoorList(dataCopy);
+      return false;
+    })
+    .catch(error => {
+      console.error(error);
+      showToast("You do not have access to this door", "error")
+    });
   }
 
   const handleSetSwiperHeight = (value) => {
@@ -113,7 +112,7 @@ function DoorControl({ navigation, route }) {
             fontWeight="bold"
             fontSize="lg"
             mx="auto"
-          >
+            >
             {uid in recipientUsernames ? recipientUsernames[uid] + "'s Access" : "Loading..."}
           </Text>
         </Box>
@@ -151,7 +150,7 @@ function DoorControl({ navigation, route }) {
         key="addAccess"
         onLayout={(event) => handleSetSwiperHeight(event.nativeEvent.layout.height)}
         my="auto"
-      >
+        >
         <Box
           margin="auto"
           justifyContent="center"
@@ -165,14 +164,14 @@ function DoorControl({ navigation, route }) {
             pb="5"
             w="100%"
             backgroundColor={cardBgColor}
-          >
+            >
             <Box>
               <Text
                 color={textColor}
                 fontWeight="bold"
                 fontSize="lg"
                 mx="auto"
-              >
+                >
                 Share This Door
             </Text>
             </Box>
@@ -182,7 +181,7 @@ function DoorControl({ navigation, route }) {
                   rounded="lg"
                   onPress={() => { navigation.navigate("Door Sharing", { doorCode: doorCode }); }}
                   backgroundColor={bgColor}
-                >
+                  >
                   <HStack>
                     <Box justifyContent="center">
                       <Text>
@@ -209,7 +208,7 @@ function DoorControl({ navigation, route }) {
                   rounded="lg"
                   onPress={() => { navigation.navigate("Door Sharing", { doorCode: doorCode, recipientIsOwner: true }); }}
                   backgroundColor={colorMode === 'dark' ? "brandPrimary.dark" : "brandPrimary.light"}
-                >
+                  >
                   <HStack>
                     <Box justifyContent="center">
                       <Text>
@@ -230,6 +229,33 @@ function DoorControl({ navigation, route }) {
                 </Button>
               </Center>
             </Box>
+            <Box mt="3">
+              <Center>
+                <Button
+                  rounded="lg"
+                  onPress={() => { navigation.navigate("Door Setup", { doorCode: doorCode }); }}
+                  backgroundColor={colorMode === 'dark' ? "brandPrimary.dark" : "brandPrimary.light"}
+                  >
+                  <HStack>
+                    <Box justifyContent="center">
+                      <Text>
+                        <Icon
+                          as={FontAwesome5}
+                          name="wrench"
+                          color={textColor}
+                          size="xs"
+                        />
+                      </Text>
+                    </Box>
+                    <Box justifyContent="center">
+                      <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color={textColor}>
+                        Door Setup
+                    </Text>
+                    </Box>
+                  </HStack>
+                </Button>
+              </Center>
+            </Box>
           </Box>
         </Box>
       </View>
@@ -240,12 +266,12 @@ function DoorControl({ navigation, route }) {
       return (
         <View key={recipientUid}
           onLayout={(event) => handleSetSwiperHeight(event.nativeEvent.layout.height)}
-        >
+          >
           <Box
             margin="auto"
             px="2"
             w="80%"
-          >
+            >
             <Box
               rounded="xl"
               margin="auto"
@@ -256,7 +282,7 @@ function DoorControl({ navigation, route }) {
               backgroundColor={cardBgColor}
               borderColor={fgColor}
               borderWidth={0}
-            >
+              >
               {displayWeeklyAccess(recipientUid)}
               <Box mt="5">
                 <Center>
@@ -264,7 +290,7 @@ function DoorControl({ navigation, route }) {
                     rounded="lg"
                     onPress={() => { navigation.navigate("Door Sharing", { doorCode: doorCode, recipientUid: recipientUid }); }}
                     backgroundColor={bgColor}
-                  >
+                    >
                     <HStack>
                       <Box justifyContent="center">
                         <Text>
@@ -304,7 +330,7 @@ function DoorControl({ navigation, route }) {
           activeDotStyle={{ display: 'none' }}
           prevButton={(<Text style={{ color: fgColor }} fontSize="5xl">‹</Text>)}
           nextButton={(<Text style={{ color: fgColor }} fontSize="5xl">›</Text>)}
-        >
+          >
           {[...getSharingCards(), addAccessCard()].map((el) => el)}
         </Swiper>
       </Box>
@@ -323,7 +349,7 @@ function DoorControl({ navigation, route }) {
             mx="auto"
             showsVerticalScrollIndicator={false}
             flex={1} flexDirection="column"
-          >
+            >
             <Box safeArea w="100%">
               <Center>
                 <Heading
@@ -333,7 +359,7 @@ function DoorControl({ navigation, route }) {
                   fontWeight="black"
                   color={fgColor}
                   textAlign="center"
-                >
+                  >
                   {doorList[doorCode].name}
                 </Heading>
                 <Box safeArea w="100%" maxW="400">
@@ -348,7 +374,7 @@ function DoorControl({ navigation, route }) {
                       rounded="full"
                       onPress={changeLockState}
                       backgroundColor="transparent"
-                    >
+                      >
                       <Text>
                         <Icon
                           as={FontAwesome}
