@@ -11,4 +11,7 @@
 - More robust friend system
   - Add friend by phone, email
   - Sync with contacts
+- Grant ownership to other users
+  - Give another user full ownership of your door
+  - Currently have to do so by giving them access at all times - not ideal
 
