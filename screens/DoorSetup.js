@@ -38,17 +38,17 @@ function DoorSetup({ navigation, route }) {
 
   async function validate() {
     if (!('email' in formData) || formData.email.length === 0) {
-      setErrors({email: 'Email address is required'});
+      setErrors({ email: 'Email address is required' });
       return false;
     }
     if (!('password' in formData) || formData.password.length === 0) {
-      setErrors({password: 'Password is required'});
+      setErrors({ password: 'Password is required' });
       return false;
     }
 
     try {
-      let response = await axios.post(`https://${doorCode}.tunnel.kundu.io/auth/setup`, {email: formData.email, password: formData.password});
-    } catch(error) {
+      let response = await axios.post(`https://${doorCode}.tunnel.kundu.io/auth/setup`, { email: formData.email, password: formData.password });
+    } catch (error) {
       console.error(error);
       showToast("Failed to set up door!", "error");
       return false;
@@ -56,9 +56,9 @@ function DoorSetup({ navigation, route }) {
     return true;
   };
 
-  async function onSubmit(){
+  async function onSubmit() {
     let validated = await validate();
-    if(!validated) {
+    if (!validated) {
       console.log('Validation Failed');
       setAttemptingSubmit(false);
       return;
@@ -71,7 +71,7 @@ function DoorSetup({ navigation, route }) {
     navigation.pop()
   }
 
-  return (    
+  return (
     <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <Center flex={1} px="3" mt="0">
         <KeyboardAvoidingView
@@ -81,13 +81,13 @@ function DoorSetup({ navigation, route }) {
           justifyContent="flex-end"
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={
-            Platform.OS !== 'web' ? 
-            Platform.select({
-               ios: () => 100,
-               android: () => 200
-            })() : 0
+            Platform.OS !== 'web' ?
+              Platform.select({
+                ios: () => 100,
+                android: () => 200
+              })() : 0
           }
-          >
+        >
           <Box safeArea p="2" py="8" w="100%" maxW="800">
             <Center>
               <HStack>
@@ -98,7 +98,7 @@ function DoorSetup({ navigation, route }) {
                     color="brandPrimary.regular"
                     fontFamily="Avenir"
                     fontWeight="black"
-                    >
+                  >
                     Door Setup
                   </Text>
                 </Box>
@@ -121,7 +121,7 @@ function DoorSetup({ navigation, route }) {
                   color={colorMode === "dark" ? "gray.300" : "gray.700"}
                   fontFamily="Avenir"
                   textAlign="center"
-                  >
+                >
                   Please enter the authentication details (usually, your own) that you'd like your door to use.
                 </Text>
               </Box>
@@ -130,19 +130,20 @@ function DoorSetup({ navigation, route }) {
                   placeholder="Email address"
                   autoCapitalize="none"
                   onChangeText={(value) => setData({ ...formData, email: value })}
-                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                  _hover={{backgroundColor: "transparent"}}
+                  _focus={{ borderColor: sentinelTheme.colors.brandPrimary.regular }}
+                  _hover={{ backgroundColor: "transparent" }}
                 />
                 <FormControl.HelperText>Sentinel Account Email</FormControl.HelperText>
                 <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
               </FormControl>
               <FormControl isRequired isInvalid={'password' in formErrors}>
                 <Input
+                  type="password"
                   placeholder="Password"
                   autoCapitalize="none"
                   onChangeText={(value) => setData({ ...formData, password: value })}
-                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                  _hover={{backgroundColor: "transparent"}}
+                  _focus={{ borderColor: sentinelTheme.colors.brandPrimary.regular }}
+                  _hover={{ backgroundColor: "transparent" }}
                   enablesReturnKeyAutomatically={true}
                   returnKeyType="go"
                   onSubmitEditing={onSubmit}
@@ -153,26 +154,26 @@ function DoorSetup({ navigation, route }) {
               <Center>
                 <Button mt="7" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
                   <HStack display="flex" flexDirection="row" h="7">
-                  {
-                    attemptingSubmit ?
-                    (<Spinner accessibilityLabel="Updating door..." color="white" display="None" />) :
-                    (<>
-                      <Box justifyContent="center">
-                        <Text textAlign="right">
-                          <Icon
-                            as={FontAwesome5}
-                            name="wrench"
-                            color="white"
-                            size="xs" />
+                    {
+                      attemptingSubmit ?
+                        (<Spinner accessibilityLabel="Updating door..." color="white" display="None" />) :
+                        (<>
+                          <Box justifyContent="center">
+                            <Text textAlign="right">
+                              <Icon
+                                as={FontAwesome5}
+                                name="wrench"
+                                color="white"
+                                size="xs" />
+                            </Text>
+                          </Box>
+                          <Box justifyContent="center">
+                            <Text ml="2" fontSize="sm" fontWeight="medium" color="white">
+                              Update Door
                         </Text>
-                      </Box>
-                      <Box justifyContent="center">
-                        <Text ml="2" fontSize="sm" fontWeight="medium" color="white">
-                          Update Door
-                        </Text>
-                      </Box>
-                    </>)
-                  }
+                          </Box>
+                        </>)
+                    }
                   </HStack>
                 </Button>
               </Center>

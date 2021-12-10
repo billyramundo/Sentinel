@@ -127,14 +127,25 @@ function sentinelLogo(color = "brandPrimary.regular") {
   )
 }
 //database configuration
+// const firebaseConfig = {
+//   apiKey: "AIzaSyCteW-dP7v8bXdmYedGy1_PZTAehNOZbxs",
+//   authDomain: "test-rules-9cd64.firebaseapp.com",
+//   databaseURL: "https://test-rules-9cd64-default-rtdb.firebaseio.com",
+//   projectId: "test-rules-9cd64",
+//   storageBucket: "test-rules-9cd64.appspot.com",
+//   messagingSenderId: "598598362177",
+//   appId: "1:598598362177:web:3c4f4b7aa78111893392c0"
+// };
+
 const firebaseConfig = {
-  apiKey: "AIzaSyCteW-dP7v8bXdmYedGy1_PZTAehNOZbxs",
-  authDomain: "test-rules-9cd64.firebaseapp.com",
-  databaseURL: "https://test-rules-9cd64-default-rtdb.firebaseio.com",
-  projectId: "test-rules-9cd64",
-  storageBucket: "test-rules-9cd64.appspot.com",
-  messagingSenderId: "598598362177",
-  appId: "1:598598362177:web:3c4f4b7aa78111893392c0"
+  apiKey: "AIzaSyDp3DdsqNfYJeCXIveh-7dDvnJhmudgdeE",
+  authDomain: "sentinel-a6249.firebaseapp.com",
+  databaseURL: "https://sentinel-a6249-default-rtdb.firebaseio.com",
+  projectId: "sentinel-a6249",
+  storageBucket: "sentinel-a6249.appspot.com",
+  messagingSenderId: "1069922297779",
+  appId: "1:1069922297779:web:2f883ac3957053cb80cdc6",
+  measurementId: "G-5WBYZYXC4J",
 };
 
 const firebaseApp = firebase.initializeApp(firebaseConfig);
