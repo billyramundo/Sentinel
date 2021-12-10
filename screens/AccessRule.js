@@ -8,6 +8,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import 'react-native-get-random-values';
 import { nanoid } from 'nanoid';
 
+//This page is where users can set times for their friends to access their doors
 import {
   Box,
   Text,
@@ -61,9 +62,9 @@ function AccessRule({ navigation, route }) {
     currentTimeType = timeType;
     setCancelText("Cancel");
     let initialDate = new Date();
-    if(currentDay >= 0 && Object.keys(accessTimes[currentDay]).length != 0) {
-      initialDate.setHours(accessTimes[currentDay][timeType].substring(0,2));
-      initialDate.setMinutes(accessTimes[currentDay][timeType].substring(2,4));
+    if (currentDay >= 0 && Object.keys(accessTimes[currentDay]).length != 0) {
+      initialDate.setHours(accessTimes[currentDay][timeType].substring(0, 2));
+      initialDate.setMinutes(accessTimes[currentDay][timeType].substring(2, 4));
       setCancelText("Remove Access");
     }
     setTimePickerDate(initialDate);
@@ -74,22 +75,22 @@ function AccessRule({ navigation, route }) {
     let time_HHmm = hours + minutes;
     let start = currentTimeType == 'start' ? time_HHmm : accessTimes[currentDay].start;
     let end = currentTimeType == 'end' ? time_HHmm : accessTimes[currentDay].end;
-    if(start != undefined && end != undefined && end < start) {
+    if (start != undefined && end != undefined && end < start) {
       showToast("End time cannot be before start time!", "error");
       updateAccessTime({});
       setTimePickerVisible(false);
       return;
     }
-    if(currentTimeType == 'start') {
-      updateAccessTime({...accessTimes[currentDay], start: time_HHmm});
-      if(!('end' in accessTimes[currentDay])) {
+    if (currentTimeType == 'start') {
+      updateAccessTime({ ...accessTimes[currentDay], start: time_HHmm });
+      if (!('end' in accessTimes[currentDay])) {
         showTimePicker('end');
         return;
       }
       setTimePickerVisible(false);
       return;
     }
-    updateAccessTime({...accessTimes[currentDay], end: time_HHmm});
+    updateAccessTime({ ...accessTimes[currentDay], end: time_HHmm });
     setTimePickerVisible(false);
   };
   function handleCancel() {
@@ -97,18 +98,18 @@ function AccessRule({ navigation, route }) {
     setTimePickerVisible(false);
     return;
   }
-
-  async function revokeAccess(){
+  //take away access from a friend you've already granted it to
+  async function revokeAccess() {
     setAttemptingSubmit(true);
-    
+
     try {
       await firebase.database().ref(`/users/access/${recipientUid}/shared/${doorCode}`).remove();
-    } catch(error) {
+    } catch (error) {
       console.error(error);
       showToast("Failed to unshare door!", "error");
       return false;
     }
-
+    //removing access on the database side
     try {
       firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist`).remove();
       showToast(`Revoked ${recipientUsername}'s access`, "success");
@@ -126,7 +127,7 @@ function AccessRule({ navigation, route }) {
     let valid = true;
 
     // Make sure username is not empty
-    if(recipientUsername == undefined || recipientUsername.length == 0){
+    if (recipientUsername == undefined || recipientUsername.length == 0) {
       setErrors({
         recipientUsername: "Please enter a username"
       });
@@ -137,7 +138,7 @@ function AccessRule({ navigation, route }) {
     await firebase.database().ref(`/usernames/${recipientUsername}/owner`).once('value', (snapshot) => {
       route.params.recipientUid = snapshot.val();
       recipientUid = route.params.recipientUid;
-      if(recipientUid === null){
+      if (recipientUid === null) {
         setErrors({
           recipientUsername: "User not found"
         });
@@ -145,18 +146,18 @@ function AccessRule({ navigation, route }) {
         return false;
       }
     })
-    .catch((error) => {
-      console.error(error);
-      valid = false;
-      return false;
-    });
-    if(!valid){
+      .catch((error) => {
+        console.error(error);
+        valid = false;
+        return false;
+      });
+    if (!valid) {
       return false;
     }
 
     // Make sure user is not a door owner
     await firebase.database().ref(`/doors/${doorCode}/owners`).once('value', (snapshot) => {
-      if(snapshot.hasChild(recipientUid)){
+      if (snapshot.hasChild(recipientUid)) {
         setErrors({
           recipientUsername: "User is owner of door"
         });
@@ -164,18 +165,18 @@ function AccessRule({ navigation, route }) {
         return false;
       }
     })
-    .catch((error) => {
-      console.error(error);
-      valid = false;
-      return false;
-    });
-    if(!valid){
+      .catch((error) => {
+        console.error(error);
+        valid = false;
+        return false;
+      });
+    if (!valid) {
       return false;
     }
 
     // Make sure user is not already shared with
     await firebase.database().ref(`/doors/${doorCode}/access`).once('value', (snapshot) => {
-      if(snapshot.hasChild(recipientUid)){
+      if (snapshot.hasChild(recipientUid)) {
         setErrors({
           recipientUsername: "User already has access to this door"
         });
@@ -183,34 +184,34 @@ function AccessRule({ navigation, route }) {
         return false;
       }
     })
-    .catch((error) => {
-      console.error(error);
-      valid = false;
-      return false;
-    });
-    if(!valid){
+      .catch((error) => {
+        console.error(error);
+        valid = false;
+        return false;
+      });
+    if (!valid) {
       return false;
     }
 
     setNewRecipientUsernameValid(valid);
     return valid;
   }
-
+  //implementation of the above validations
   async function validate() {
     setAttemptingSubmit(true);
     setErrors({});
 
-    if(isNewShare && !(await validateRecipientUsername())){
+    if (isNewShare && !(await validateRecipientUsername())) {
       return false;
     }
 
-    if(accessTimes.every(x => x == undefined || Object.keys(x).length == 0)) {
+    if (accessTimes.every(x => x == undefined || Object.keys(x).length == 0)) {
       showToast("Please add at least one access period!", "error");
       return false;
     }
 
     for (var index = 0; index < accessTimes.length; index++) {
-      if(Object.keys(accessTimes[index]).length < 2) {
+      if (Object.keys(accessTimes[index]).length < 2) {
         try {
           firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-data/${index}`).remove();
           continue;
@@ -222,8 +223,8 @@ function AccessRule({ navigation, route }) {
       let timeStr = String(accessTimes[index].start) + "," + String(accessTimes[index].end);
       try {
         await firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-data/${index}`).set(timeStr);
-        
-        if(isNewShare) {
+
+        if (isNewShare) {
           let accessToken = nanoid(ACCESS_TOKEN_LENGTH);
           await firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-token`).set(accessToken);
           await firebase.database().ref(`/users/access/${recipientUid}/shared/${doorCode}/access-tokens/time-weekly-whitelist`).set(accessToken);
@@ -238,7 +239,7 @@ function AccessRule({ navigation, route }) {
 
     try {
       await firebase.database().ref(`/users/access/${recipientUid}/shared/${doorCode}/nickname`).set(`${username}'s Door`);
-    } catch(error) {
+    } catch (error) {
       console.error(error);
       showToast("Failed to share door!", "error");
       try {
@@ -252,9 +253,9 @@ function AccessRule({ navigation, route }) {
     showToast("Rules saved successfully", "success");
     return true;
   }
-  async function onSubmit(){
+  async function onSubmit() {
     let validated = await validate();
-    if(!validated) {
+    if (!validated) {
       console.log('Rule saving failed');
       setAttemptingSubmit(false);
       return;
@@ -265,7 +266,7 @@ function AccessRule({ navigation, route }) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      if(!isNewShare) {
+      if (!isNewShare) {
         firebase.database().ref(`/users/public/${recipientUid}/username`).once('value', snapshot => {
           setRecipientUsername(snapshot.val());
         });
@@ -273,7 +274,7 @@ function AccessRule({ navigation, route }) {
 
       let newAccessTimes = [...accessTimes];
       firebase.database().ref(`/doors/${doorCode}/access/${recipientUid}/time-weekly-whitelist/access-data`).once('value', snapshot => {
-        snapshot.forEach(function(result) {
+        snapshot.forEach(function (result) {
           let accessObj = {};
           let index = parseInt(result.key);
           accessObj.start = result.val().substring(0, 4);
@@ -281,47 +282,47 @@ function AccessRule({ navigation, route }) {
           newAccessTimes[index] = accessObj;
         });
       })
-      .then(function() {
-        setAccessTimes(newAccessTimes);
-      });
+        .then(function () {
+          setAccessTimes(newAccessTimes);
+        });
     });
 
     return unsubscribe;
   }, [navigation]);
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  //Sets up the display chart where users grant access at certain times
   function displayRuleConfig() {
-    return accessTimes.map(function(dayAccess, index)
-      {
-        return (
-          <Box key={index} mx="auto" px="4" py="1" w="100%">
-            <HStack w="100%">
-              <Box w="30%" justifyContent="center">
-                <Text fontSize="md" textAlign="left" fontWeight="medium" color={textColor}>{daysOfWeek[index]}</Text>
-              </Box>
-              <Box w="70%" justifyContent="center" alignItems="flex-end" flexDirection="column">
-                <Box justifyContent="center" alignItems="center" flexDirection="row">
-                  {
-                    Object.keys(dayAccess).length == 0 ?
-                    <Button rounded="lg" onPress={() => {currentDay = index; showTimePicker('start');}} backgroundColor={noAccessButtonBgColor}>
+    return accessTimes.map(function (dayAccess, index) {
+      return (
+        <Box key={index} mx="auto" px="4" py="1" w="100%">
+          <HStack w="100%">
+            <Box w="30%" justifyContent="center">
+              <Text fontSize="md" textAlign="left" fontWeight="medium" color={textColor}>{daysOfWeek[index]}</Text>
+            </Box>
+            <Box w="70%" justifyContent="center" alignItems="flex-end" flexDirection="column">
+              <Box justifyContent="center" alignItems="center" flexDirection="row">
+                {
+                  Object.keys(dayAccess).length == 0 ?
+                    <Button rounded="lg" onPress={() => { currentDay = index; showTimePicker('start'); }} backgroundColor={noAccessButtonBgColor}>
                       <Text color={timeButtonTextColor}>No Access</Text>
                     </Button> :
                     <>
-                      <Button rounded="lg" onPress={() => {currentDay = index; showTimePicker('start');}} backgroundColor={timeButtonBgColor}>
-                      <Text color={timeButtonTextColor}>{localeTimeString(dayAccess.start)}</Text>
+                      <Button rounded="lg" onPress={() => { currentDay = index; showTimePicker('start'); }} backgroundColor={timeButtonBgColor}>
+                        <Text color={timeButtonTextColor}>{localeTimeString(dayAccess.start)}</Text>
                       </Button>
                       <Text mx="2" fontSize="sm" textAlign="right" fontWeight="medium" color={textColor} alignItems="center">to</Text>
-                      <Button rounded="lg" onPress={() => {currentDay = index; showTimePicker('end');}} backgroundColor={timeButtonBgColor}>
+                      <Button rounded="lg" onPress={() => { currentDay = index; showTimePicker('end'); }} backgroundColor={timeButtonBgColor}>
                         <Text color={timeButtonTextColor}>{localeTimeString(dayAccess.end)}</Text>
                       </Button>
                     </>
-                  }
-                </Box>
+                }
               </Box>
-            </HStack>
-          </Box>
-        )
-      }
+            </Box>
+          </HStack>
+        </Box>
+      )
+    }
     )
   }
 
@@ -329,115 +330,116 @@ function AccessRule({ navigation, route }) {
   let timeButtonBgColor = "green.700";
   let timeButtonTextColor = "white";
   let noAccessButtonBgColor = "red.900";
-  return (    
+  //What is actually displayed on the page
+  return (
     <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <SafeAreaView flex={1} edges={['top', 'left', 'right']}>
         <ScrollView mx="auto" w="100%" maxW="800" showsVerticalScrollIndicator={false}>
           <Box mt="10">
             {
               isNewShare ?
-              (<Box mx="20%">
-                <FormControl isInvalid={'recipientUsername' in formErrors}>
-                  <Input
-                    size="lg"
-                    placeholder="Share with..."
-                    onChangeText={(value) => setRecipientUsername(value)}
-                    _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                    _hover={{backgroundColor: "transparent"}}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    onEndEditing={validateRecipientUsername}
-                    borderColor={newRecipientUsernameValid ? "green.400" : null}
-                  />
-                  <Center>
-                    <FormControl.ErrorMessage>{formErrors.recipientUsername}</FormControl.ErrorMessage>
-                  </Center>
-                </FormControl>
-              </Box>) :
-              (<Heading
-                size="xl"
-                fontWeight="600"
-                fontFamily="Avenir"
-                fontWeight="bold"
-                textAlign="center"
+                (<Box mx="20%">
+                  <FormControl isInvalid={'recipientUsername' in formErrors}>
+                    <Input
+                      size="lg"
+                      placeholder="Share with..."
+                      onChangeText={(value) => setRecipientUsername(value)}
+                      _focus={{ borderColor: sentinelTheme.colors.brandPrimary.regular }}
+                      _hover={{ backgroundColor: "transparent" }}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      onEndEditing={validateRecipientUsername}
+                      borderColor={newRecipientUsernameValid ? "green.400" : null}
+                    />
+                    <Center>
+                      <FormControl.ErrorMessage>{formErrors.recipientUsername}</FormControl.ErrorMessage>
+                    </Center>
+                  </FormControl>
+                </Box>) :
+                (<Heading
+                  size="xl"
+                  fontWeight="600"
+                  fontFamily="Avenir"
+                  fontWeight="bold"
+                  textAlign="center"
                 >
-                {recipientUsername + "'s Access"}
-              </Heading>)
+                  {recipientUsername + "'s Access"}
+                </Heading>)
             }
           </Box>
           {
             recipientIsOwner ? null :
-            (<Box mt="10">
-              <Box mx="auto" w="100%" px="4" py="5">
-                <Center w="100%">
-                  <VStack w="100%" backgroundColor={colorMode === 'dark' ? "gray.900" : "gray.700"} rounded="xl" py="3">
-                    {displayRuleConfig()}
-                  </VStack>
-                </Center>
-              </Box>
-            </Box>)
+              (<Box mt="10">
+                <Box mx="auto" w="100%" px="4" py="5">
+                  <Center w="100%">
+                    <VStack w="100%" backgroundColor={colorMode === 'dark' ? "gray.900" : "gray.700"} rounded="xl" py="3">
+                      {displayRuleConfig()}
+                    </VStack>
+                  </Center>
+                </Box>
+              </Box>)
           }
           <Button mt="10" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="green.700">
             <HStack display="flex" flexDirection="row" h="7">
               {
                 attemptingSubmit ?
-                (<Spinner accessibilityLabel="Saving rules..." color="white" display="None" />) :
-                (<>
-                  <Box justifyContent="center">
-                    <Text textAlign="right">
-                      <Icon
-                        as={FontAwesome5}
-                        name="save"
-                        color="white"
-                        size="xs" />
-                    </Text>
-                  </Box>
-                  <Box justifyContent="center">
-                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
-                      Save Rules
-                    </Text>
-                  </Box>
-                </>)
-              }
-            </HStack>
-          </Button>
-          {
-            isNewShare ?
-            null :
-            <>
-            <Center mt="5"><Text color={colorMode === 'dark' ? "gray.200" : "gray.800"}>or</Text></Center>
-            <Button mt="5" w="50%" mx="auto" rounded="lg" onPress={revokeAccess} backgroundColor="red.900">
-              <HStack display="flex" flexDirection="row" h="7">
-                {
-                  attemptingSubmit ?
-                  (<Spinner accessibilityLabel="Saving access..." color="white" display="None" />) :
+                  (<Spinner accessibilityLabel="Saving rules..." color="white" display="None" />) :
                   (<>
                     <Box justifyContent="center">
                       <Text textAlign="right">
                         <Icon
                           as={FontAwesome5}
-                          name="minus-circle"
+                          name="save"
                           color="white"
                           size="xs" />
                       </Text>
                     </Box>
                     <Box justifyContent="center">
                       <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
-                        Revoke Access
-                      </Text>
+                        Save Rules
+                    </Text>
                     </Box>
                   </>)
-                }
-              </HStack>
-            </Button>
-            </>
-        }
+              }
+            </HStack>
+          </Button>
+          {
+            isNewShare ?
+              null :
+              <>
+                <Center mt="5"><Text color={colorMode === 'dark' ? "gray.200" : "gray.800"}>or</Text></Center>
+                <Button mt="5" w="50%" mx="auto" rounded="lg" onPress={revokeAccess} backgroundColor="red.900">
+                  <HStack display="flex" flexDirection="row" h="7">
+                    {
+                      attemptingSubmit ?
+                        (<Spinner accessibilityLabel="Saving access..." color="white" display="None" />) :
+                        (<>
+                          <Box justifyContent="center">
+                            <Text textAlign="right">
+                              <Icon
+                                as={FontAwesome5}
+                                name="minus-circle"
+                                color="white"
+                                size="xs" />
+                            </Text>
+                          </Box>
+                          <Box justifyContent="center">
+                            <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                              Revoke Access
+                      </Text>
+                          </Box>
+                        </>)
+                    }
+                  </HStack>
+                </Button>
+              </>
+          }
         </ScrollView>
         <DateTimePickerModal
           isVisible={timePickerVisible}
           mode="time"
           date={timePickerDate}
-          onConfirm={(date) => {handleConfirm(date, currentTimeType);}}
+          onConfirm={(date) => { handleConfirm(date, currentTimeType); }}
           onCancel={handleCancel}
           confirmTextIOS={"Set " + currentTimeType.charAt(0).toUpperCase() + currentTimeType.substring(1) + " Time"}
           cancelTextIOS={cancelText}

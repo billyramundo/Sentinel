@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Swiper from 'react-native-swiper/src';
 import axios from "axios";
 
+//Page where the user can unlock and lock doors, navigate to door control page
 import {
   View,
   Box,
@@ -38,14 +39,14 @@ function DoorControl({ navigation, route }) {
   const [swiperHeight, setSwiperHeight] = useState(0);
   const [swiperViewKeys, setSwiperViewKeys] = useState([]);
   let doorCode = route.params.doorCode;
-
+  //Changes to UI of the page when door is locked and unlocked 
   let bgColor = sentinelTheme.colors[doorList[doorCode].locked ? "locked" : "unlocked"]["background"][colorMode]
   let fgColor = sentinelTheme.colors[doorList[doorCode].locked ? "locked" : "unlocked"][colorMode === 'dark' ? 'regular' : 'dark']
   let textColor = colorMode === 'dark' ? "gray.300" : "gray.900";
   let textColorAlt = colorMode === 'dark' ? "gray.300" : "gray.900";
   // let cardBgColor = colorMode === 'dark' ? "gray.900" : "gray.300";
   let cardBgColor = colorMode === 'dark' ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.3)";
-
+  //change actual lock/unlock status in backend so hardware will actually react
   function changeLockState() {
     const doorData = { ...doorList };
     const dataCopy = doorData;
@@ -100,6 +101,7 @@ function DoorControl({ navigation, route }) {
     return unsubscribe;
   }, [navigation]);
 
+  //table to show which friends you have granted access to at which times
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   function displayWeeklyAccess(uid) {
     let accessTimes = uid in sharingData ? sharingData[uid] : Array(7).fill(undefined);
@@ -142,7 +144,7 @@ function DoorControl({ navigation, route }) {
       </>
     );
   }
-
+  //Box that initially shows on door control page that links to access table and adding an owner
   function addAccessCard() {
     return (
       <View
@@ -308,7 +310,7 @@ function DoorControl({ navigation, route }) {
       </Box>
     )
   }
-
+  //Display UI
   return (
     <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <View w="100%" h="100%" backgroundColor={bgColor}>

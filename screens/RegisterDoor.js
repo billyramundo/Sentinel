@@ -9,6 +9,7 @@ import 'react-native-get-random-values';
 import { nanoid } from 'nanoid';
 // import TimezoneSelect from "react-timezone-select";
 
+//Page to register a new door when a user recieves it
 import {
   Box,
   Text,
@@ -37,18 +38,18 @@ function RegisterDoor({ navigation }) {
   const [timezone, setTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
-
+  //validation for door code
   async function validate() {
     if (!('code' in formData) || formData.code.length === 0) {
-      setErrors({code: 'Code is required'});
+      setErrors({ code: 'Code is required' });
       return false;
     } else if (formData.code.length < 10) {
-      setErrors({code: 'Code must be 10 characters'});
+      setErrors({ code: 'Code must be 10 characters' });
       return false;
     }
 
     if (!('name' in formData) || formData.name.length === 0) {
-      setErrors({name: 'A name is required'});
+      setErrors({ name: 'A name is required' });
       return false;
     }
 
@@ -59,7 +60,7 @@ function RegisterDoor({ navigation }) {
 
     let code = formData.code.toLowerCase();
     let uid = firebase.auth().currentUser.uid;
-  
+
     // Attempt to create door (and set access tokens for owner)
     try {
       let accessToken = nanoid(ACCESS_TOKEN_LENGTH);
@@ -67,11 +68,11 @@ function RegisterDoor({ navigation }) {
       await firebase.database().ref(`/users/access/${uid}/owned/${code}/access-token`).set(accessToken);
       console.log("Generated & saved new access token");
       accessToken = undefined;
-    } catch(error) {
+    } catch (error) {
       console.error(error);
       console.error(error.code);
       if (error.code.toUpperCase() === 'PERMISSION_DENIED') {
-        setErrors({code: 'This door is not eligible for registration.'});
+        setErrors({ code: 'This door is not eligible for registration.' });
         return false;
       }
       return false;
@@ -84,17 +85,17 @@ function RegisterDoor({ navigation }) {
       console.error(error);
       console.error(error.code);
       if (error.code.toUpperCase() === 'PERMISSION_DENIED') {
-        setErrors({code: 'An error occurred setting the nickname for the door!'});
+        setErrors({ code: 'An error occurred setting the nickname for the door!' });
         return false;
       }
     }
 
     return true;
   };
-
-  async function onSubmit(){
+  //What the user is shown when door is successfully registered
+  async function onSubmit() {
     let validated = await validate();
-    if(!validated) {
+    if (!validated) {
       console.log('Validation Failed');
       setAttemptingSubmit(false);
       return;
@@ -107,8 +108,8 @@ function RegisterDoor({ navigation }) {
   const moveLogin = () => {
     navigation.pop()
   }
-
-  return (    
+  //Display UI
+  return (
     <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <Center flex={1} px="3" mt="0">
         <KeyboardAvoidingView
@@ -118,11 +119,11 @@ function RegisterDoor({ navigation }) {
           justifyContent="flex-end"
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={
-            Platform.OS !== 'web' ? 
-            Platform.select({
-               ios: () => 100,
-               android: () => 200
-            })() : 0
+            Platform.OS !== 'web' ?
+              Platform.select({
+                ios: () => 100,
+                android: () => 200
+              })() : 0
           }
         >
           <Box safeArea p="2" py="8" w="100%" maxW="800">
@@ -135,7 +136,7 @@ function RegisterDoor({ navigation }) {
                     color="brandPrimary.regular"
                     fontFamily="Avenir"
                     fontWeight="black"
-                    >
+                  >
                     Register Your Door
                   </Text>
                 </Box>
@@ -159,8 +160,8 @@ function RegisterDoor({ navigation }) {
                   autoCorrect={false}
                   onChangeText={(value) => setData({ ...formData, code: value })}
                   maxLength={10}
-                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                  _hover={{backgroundColor: "transparent"}}
+                  _focus={{ borderColor: sentinelTheme.colors.brandPrimary.regular }}
+                  _hover={{ backgroundColor: "transparent" }}
                 />
                 <FormControl.HelperText>The 10-character code of the Sentinel Device</FormControl.HelperText>
                 <FormControl.ErrorMessage>{formErrors.code}</FormControl.ErrorMessage>
@@ -170,8 +171,8 @@ function RegisterDoor({ navigation }) {
                   placeholder="Door name"
                   autoCapitalize="words"
                   onChangeText={(value) => setData({ ...formData, name: value })}
-                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                  _hover={{backgroundColor: "transparent"}}
+                  _focus={{ borderColor: sentinelTheme.colors.brandPrimary.regular }}
+                  _hover={{ backgroundColor: "transparent" }}
                   enablesReturnKeyAutomatically={true}
                   returnKeyType="go"
                   onSubmitEditing={onSubmit}
@@ -190,26 +191,26 @@ function RegisterDoor({ navigation }) {
               <Center>
                 <Button mt="7" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
                   <HStack display="flex" flexDirection="row" h="7">
-                  {
-                    attemptingSubmit ?
-                    (<Spinner accessibilityLabel="Registering door..." color="white" display="None" />) :
-                    (<>
-                      <Box justifyContent="center">
-                        <Text textAlign="right">
-                          <Icon
-                            as={FontAwesome5}
-                            name="plus"
-                            color="white"
-                            size="xs" />
+                    {
+                      attemptingSubmit ?
+                        (<Spinner accessibilityLabel="Registering door..." color="white" display="None" />) :
+                        (<>
+                          <Box justifyContent="center">
+                            <Text textAlign="right">
+                              <Icon
+                                as={FontAwesome5}
+                                name="plus"
+                                color="white"
+                                size="xs" />
+                            </Text>
+                          </Box>
+                          <Box justifyContent="center">
+                            <Text ml="2" fontSize="sm" fontWeight="medium" color="white">
+                              Register Door
                         </Text>
-                      </Box>
-                      <Box justifyContent="center">
-                        <Text ml="2" fontSize="sm" fontWeight="medium" color="white">
-                          Register Door
-                        </Text>
-                      </Box>
-                    </>)
-                  }
+                          </Box>
+                        </>)
+                    }
                   </HStack>
                 </Button>
               </Center>

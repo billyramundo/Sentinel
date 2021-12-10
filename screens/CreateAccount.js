@@ -4,6 +4,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
 
+//Create account page for new users
 import {
   Box,
   Text,
@@ -34,6 +35,7 @@ function CreateAccount({ navigation }) {
   var [formErrors, setErrors] = useState({});
   const [attemptingSubmit, setAttemptingSubmit] = useState(false);
 
+  //basic validation on specs of chosen user info (make sure emails are actually emails, etc.)
   async function validate() {
     setErrors({});
 
@@ -50,11 +52,11 @@ function CreateAccount({ navigation }) {
         username: 'Username is too short',
       });
       return false;
-    } else if (username_lower !== undefined){
+    } else if (username_lower !== undefined) {
       let snapshot = await firebase.database().ref(`usernames/${username_lower}`).once("value").catch(error => {
         console.error(error);
       });
-      if(snapshot.exists()) {
+      if (snapshot.exists()) {
         setErrors({
           username: 'Username is already taken',
         });
@@ -80,7 +82,7 @@ function CreateAccount({ navigation }) {
       });
       return false;
     }
-  
+
     // Attempt to create user
     setAttemptingSubmit(true);
     let shouldReturnFalse = false;
@@ -101,25 +103,25 @@ function CreateAccount({ navigation }) {
       }
       console.error(error.code);
       console.error(error);
-  
+
       // Do not validate
       shouldReturnFalse = true;
       return false;
     });
 
-    if(shouldReturnFalse) {
+    if (shouldReturnFalse) {
       return false;
     }
 
-    if(auth === undefined || auth === false) {
+    if (auth === undefined || auth === false) {
       console.error("Encountered unhandled error when creating new user.");
       return false;
     }
-    
+
     console.log('User account created & signed in!');
 
     // Put user's username in Firebase auth db
-    await auth.user.updateProfile({displayName: formData.username}).catch((error) => {
+    await auth.user.updateProfile({ displayName: formData.username }).catch((error) => {
       console.error(error);
     });
 
@@ -139,9 +141,9 @@ function CreateAccount({ navigation }) {
     return true;
   };
 
-  async function onSubmit(){
+  async function onSubmit() {
     let validated = await validate();
-    if(!validated) {
+    if (!validated) {
       console.log('Validation Failed');
       setAttemptingSubmit(false);
       return;
@@ -156,8 +158,8 @@ function CreateAccount({ navigation }) {
   const moveLogin = () => {
     navigation.pop();
   }
-
-  return (    
+  //display UI
+  return (
     <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <SafeAreaView flex={1} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView
@@ -168,11 +170,11 @@ function CreateAccount({ navigation }) {
           justifyContent="flex-end"
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={
-            Platform.OS !== 'web' ? 
-            Platform.select({
+            Platform.OS !== 'web' ?
+              Platform.select({
                 ios: () => 150,
                 android: () => 0
-            })() : 0
+              })() : 0
           }
         >
           <Box safeArea px="3" py="8" w="90%" mx="auto" h="100%" justifyContent="center">
@@ -182,40 +184,40 @@ function CreateAccount({ navigation }) {
 
             <VStack space={3} mt="6">
               <FormControl isRequired isInvalid={'username' in formErrors}>
-              <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Username</FormControl.Label>
+                <FormControl.Label _text={{ color: sentinelTheme.colors.grayLabelText[colorMode] }}>Username</FormControl.Label>
                 <Input
                   size="md"
                   placeholder="Username"
                   onChangeText={(value) => setData({ ...formData, username: value })}
-                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                  _hover={{backgroundColor: "transparent"}}
+                  _focus={{ borderColor: sentinelTheme.colors.brandPrimary.regular }}
+                  _hover={{ backgroundColor: "transparent" }}
                   autoCapitalize="none"
                 />
                 <FormControl.HelperText>Username must contain at least 3 characters.</FormControl.HelperText>
                 <FormControl.ErrorMessage>{formErrors.username}</FormControl.ErrorMessage>
               </FormControl>
               <FormControl isRequired isInvalid={'email' in formErrors}>
-                <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Email Address</FormControl.Label>
+                <FormControl.Label _text={{ color: sentinelTheme.colors.grayLabelText[colorMode] }}>Email Address</FormControl.Label>
                 <Input
                   size="md"
                   placeholder="Email"
                   onChangeText={(value) => setData({ ...formData, email: value })}
-                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                  _hover={{backgroundColor: "transparent"}}
+                  _focus={{ borderColor: sentinelTheme.colors.brandPrimary.regular }}
+                  _hover={{ backgroundColor: "transparent" }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
                 <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
               </FormControl>
               <FormControl isRequired isInvalid={'password' in formErrors}>
-              <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Password</FormControl.Label>
+                <FormControl.Label _text={{ color: sentinelTheme.colors.grayLabelText[colorMode] }}>Password</FormControl.Label>
                 <Input
                   size="md"
                   type="password"
                   placeholder="Password"
                   onChangeText={(value) => setData({ ...formData, password: value })}
-                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                  _hover={{backgroundColor: "transparent"}}
+                  _focus={{ borderColor: sentinelTheme.colors.brandPrimary.regular }}
+                  _hover={{ backgroundColor: "transparent" }}
                   enablesReturnKeyAutomatically={true}
                   returnKeyType="go"
                   onSubmitEditing={onSubmit}
@@ -228,23 +230,23 @@ function CreateAccount({ navigation }) {
                   <HStack display="flex" flexDirection="row" h="7">
                     {
                       attemptingSubmit ?
-                      (<Spinner accessibilityLabel="Creating account..." color="white" display="None" />) :
-                      (<>
-                        <Box justifyContent="center">
-                          <Text textAlign="right">
-                            <Icon
-                              as={FontAwesome5}
-                              name="id-card"
-                              color="white"
-                              size="xs" />
+                        (<Spinner accessibilityLabel="Creating account..." color="white" display="None" />) :
+                        (<>
+                          <Box justifyContent="center">
+                            <Text textAlign="right">
+                              <Icon
+                                as={FontAwesome5}
+                                name="id-card"
+                                color="white"
+                                size="xs" />
+                            </Text>
+                          </Box>
+                          <Box justifyContent="center">
+                            <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                              Create Account
                           </Text>
-                        </Box>
-                        <Box justifyContent="center">
-                          <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
-                            Create Account
-                          </Text>
-                        </Box>
-                      </>)
+                          </Box>
+                        </>)
                     }
                   </HStack>
                 </Button>
@@ -258,15 +260,15 @@ function CreateAccount({ navigation }) {
                   }}
                 >
                   Already registered?{" "}
-                <Link
-                  _text={{
-                    color: "brandPrimary.regular",
-                    fontWeight: "medium",
-                    fontSize: "sm",
-                  }}
-                  onPress={moveLogin}
+                  <Link
+                    _text={{
+                      color: "brandPrimary.regular",
+                      fontWeight: "medium",
+                      fontSize: "sm",
+                    }}
+                    onPress={moveLogin}
                   >
-                  Sign in
+                    Sign in
                 </Link>
                 </Text>
               </HStack>

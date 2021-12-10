@@ -8,6 +8,7 @@ import "firebase/auth";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { sentinelLogo, sentinelTheme, sentinelThemeLight, sentinelThemeDark, useDoorList } from "./Login";
 
+//Home page for each user where they can see all doors they have access to and add new doors to their account
 import {
   Box,
   Heading,
@@ -41,6 +42,7 @@ function Home({ navigation }) {
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     return time;
   };
+  //functionality for when a user signs out of their account
   const onSignout = () => {
     firebase.auth().signOut().then(() => {
       // Go to Login screen and reset nav stack
@@ -52,6 +54,7 @@ function Home({ navigation }) {
       console.error(error);
     });
   }
+  //creates icons for all doors divided into shared and owned categories
   function generateDoorButtons(doorList, filterKey, filterVal) {
     return Object.keys(doorList).filter(doorCode => doorList[doorCode][filterKey] === filterVal).map(doorCode =>
       <Pressable
@@ -105,7 +108,7 @@ function Home({ navigation }) {
       </Pressable>
     )
   }
-
+  //function that gathers the list of all doors - ensures that new doors are displayed correctly 
   async function updateDoorList() {
     let doorsOwned = await firebase.database().ref(`/users/access/${firebase.auth().currentUser.uid}/owned`).once("value").catch(error => {
       console.error(error);
@@ -135,7 +138,7 @@ function Home({ navigation }) {
       };
     });
 
-
+    //make sure the color of the icons is dynamically updated
     for (const code of Object.keys(updatedList)) {
       const resp = await axios.get("https://" + code + ".tunnel.kundu.io/status")
       console.log(resp.data.locked)
@@ -155,7 +158,7 @@ function Home({ navigation }) {
 
     return unsubscribe;
   }, [navigation]);
-
+  //Display UI
   return (
     <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <SafeAreaView flex={1} edges={['top', 'left', 'right']}>

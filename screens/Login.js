@@ -5,7 +5,7 @@ import "firebase/database";
 import "firebase/auth";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useBetween } from "use-between";
-
+//Initial Login Page when you first open the app - also links to create account page
 import {
   Box,
   Text,
@@ -26,7 +26,7 @@ import {
 
 import { useColorScheme, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+//main color theme for the app
 const sentinelTheme = {
   colors: {
     brandPrimary: {
@@ -63,7 +63,7 @@ const sentinelTheme = {
     }
   },
 };
-
+//light mode color theme
 const sentinelThemeLight = {
   colors: {
     ...sentinelTheme.colors
@@ -77,7 +77,7 @@ const sentinelThemeLight = {
     }
   }
 }
-
+//dark mode color theme
 const sentinelThemeDark = {
   colors: {
     ...sentinelTheme.colors
@@ -97,36 +97,36 @@ const sentinelThemeDark = {
     }
   }
 }
-
-function sentinelLogo(color="brandPrimary.regular") {
+//project logo
+function sentinelLogo(color = "brandPrimary.regular") {
   return (
-  <HStack>
-    <Box justifyContent="center">
-      <Text
-        fontSize={50}
-        fontWeight="600"
-        color={color}
-        fontFamily="Avenir"
-        fontWeight="black"
-        mt="1"
-        >
-        Sentinel
-      </Text>
-    </Box>
-    <Box ml="4" justifyContent="center" textAlign="center">
-      <Text>
-        <Icon
-          as={FontAwesome5}
-          name="user-shield"
+    <HStack>
+      <Box justifyContent="center">
+        <Text
+          fontSize={50}
+          fontWeight="600"
           color={color}
-          size={10}
-        />
+          fontFamily="Avenir"
+          fontWeight="black"
+          mt="1"
+        >
+          Sentinel
       </Text>
-    </Box>
-  </HStack>
+      </Box>
+      <Box ml="4" justifyContent="center" textAlign="center">
+        <Text>
+          <Icon
+            as={FontAwesome5}
+            name="user-shield"
+            color={color}
+            size={10}
+          />
+        </Text>
+      </Box>
+    </HStack>
   )
 }
-
+//database configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCteW-dP7v8bXdmYedGy1_PZTAehNOZbxs",
   authDomain: "test-rules-9cd64.firebaseapp.com",
@@ -146,22 +146,22 @@ let username = "";
 let username_stylized = "";
 let auth = {};
 
-async function showToast(text, type, duration=5000) {
+async function showToast(text, type, duration = 5000) {
   let toastBgColor = "#444";
-  if(type == 'success') {
+  if (type == 'success') {
     toastBgColor = "#050";
   }
-  else if(type == 'error') {
+  else if (type == 'error') {
     toastBgColor = "#500";
   }
-  Toast.show({description: text, placement: "bottom", style: {backgroundColor: toastBgColor}, duration: duration});
+  Toast.show({ description: text, placement: "bottom", style: { backgroundColor: toastBgColor }, duration: duration });
 }
 async function closeAllToasts() {
   Toast.closeAll();
 }
 
 const localeTimeString = (time_HHmm) => {
-  if(time_HHmm == undefined) {
+  if (time_HHmm == undefined) {
     return "...";
   }
   var dummyDate = new Date();
@@ -169,7 +169,7 @@ const localeTimeString = (time_HHmm) => {
   dummyDate.setMinutes(time_HHmm.substring(2, 4));
   let localeTimeString = dummyDate.toLocaleTimeString().trim();
   // Remove seconds if present
-  if((localeTimeString.match(/:/g)||[]).length == 2){
+  if ((localeTimeString.match(/:/g) || []).length == 2) {
     localeTimeString = localeTimeString.replace(/:\d\d(?: |$)/, ' ').trim();
   }
   return localeTimeString;
@@ -192,10 +192,10 @@ function Login({ navigation }) {
   var [formData, setData] = useState({});
   var [formErrors, setErrors] = useState({});
   const [attemptingSubmit, setAttemptingSubmit] = useState(false);
-  
+
   async function validate() {
     setErrors({});
-  
+    //Initial form boxes displayed on page
     let shouldReturnFalse = false;
     if (!('email' in formData) || formData.email.length === 0) {
       setErrors({
@@ -245,7 +245,7 @@ function Login({ navigation }) {
         return false;
       }
     });
-    if(shouldReturnFalse || auth === undefined || auth.user === undefined) {
+    if (shouldReturnFalse || auth === undefined || auth.user === undefined) {
       return false;
     }
 
@@ -260,16 +260,16 @@ function Login({ navigation }) {
 
     return true;
   };
-
-  async function onSubmit(){
+  //scenario where user not found
+  async function onSubmit() {
     let validated = await validate();
-    if(!validated) {
+    if (!validated) {
       console.log('Login failed');
       setAttemptingSubmit(false);
       return;
     }
     console.log(`User ${username} logged in successfully`);
-    
+
     // Go home AND reset nav stack
     navigation.reset({
       routes: [{ name: 'Home' }]
@@ -287,9 +287,9 @@ function Login({ navigation }) {
 
   // set auth persistence
   firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .catch(function(error){
-    console.log("failed to set persistence: " + error.message)
-  });
+    .catch(function (error) {
+      console.log("failed to set persistence: " + error.message)
+    });
   // if user is logged in, go home
   firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
@@ -308,8 +308,8 @@ function Login({ navigation }) {
     }
     return true;
   });
-
-  return (    
+  //display UI
+  return (
     <NativeBaseProvider theme={colorMode === 'dark' ? extendTheme(sentinelThemeDark) : extendTheme(sentinelThemeLight)}>
       <SafeAreaView flex={1} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView
@@ -321,38 +321,38 @@ function Login({ navigation }) {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={
             Platform.OS !== "web" && Platform.select({
-                ios: () => 0,
-                android: () => 0
+              ios: () => 0,
+              android: () => 0
             })()
           }
-          >
+        >
           <Box safeArea px="3" py="8" w="90%" mx="auto" h="100%" justifyContent="center">
             <Center>
               {sentinelLogo()}
             </Center>
             <VStack space={3} mt="6">
               <FormControl isInvalid={'email' in formErrors}>
-                <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Email Address</FormControl.Label>
+                <FormControl.Label _text={{ color: sentinelTheme.colors.grayLabelText[colorMode] }}>Email Address</FormControl.Label>
                 <Input
                   size="md"
                   placeholder="Email"
                   onChangeText={(value) => setData({ ...formData, email: value })}
-                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                  _hover={{backgroundColor: "transparent"}}
+                  _focus={{ borderColor: sentinelTheme.colors.brandPrimary.regular }}
+                  _hover={{ backgroundColor: "transparent" }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
                 <FormControl.ErrorMessage>{formErrors.email}</FormControl.ErrorMessage>
               </FormControl>
               <FormControl isInvalid={'password' in formErrors}>
-                <FormControl.Label _text={{color: sentinelTheme.colors.grayLabelText[colorMode]}}>Password</FormControl.Label>
+                <FormControl.Label _text={{ color: sentinelTheme.colors.grayLabelText[colorMode] }}>Password</FormControl.Label>
                 <Input
                   size="md"
                   type="password"
                   placeholder="Password"
                   onChangeText={(value) => setData({ ...formData, password: value })}
-                  _focus={{borderColor: sentinelTheme.colors.brandPrimary.regular}}
-                  _hover={{backgroundColor: "transparent"}}
+                  _focus={{ borderColor: sentinelTheme.colors.brandPrimary.regular }}
+                  _hover={{ backgroundColor: "transparent" }}
                   enablesReturnKeyAutomatically={true}
                   autoCapitalize="none"
                   returnKeyType="go"
@@ -372,58 +372,58 @@ function Login({ navigation }) {
                 </Link> */}
               </FormControl>
             </VStack>
-          <Button mt="10" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
-            <HStack display="flex" flexDirection="row" h="7">
-              {
-                attemptingSubmit ?
-                (<Spinner accessibilityLabel="Signing in..." color="white" display="None" />) :
-                (<>
-                  <Box justifyContent="center">
-                    <Text textAlign="right">
-                      <Icon
-                        as={FontAwesome5}
-                        name="sign-in-alt"
-                        color="white"
-                        size="xs" />
+            <Button mt="10" w="70%" mx="auto" rounded="lg" onPress={onSubmit} backgroundColor="brandPrimary.regular">
+              <HStack display="flex" flexDirection="row" h="7">
+                {
+                  attemptingSubmit ?
+                    (<Spinner accessibilityLabel="Signing in..." color="white" display="None" />) :
+                    (<>
+                      <Box justifyContent="center">
+                        <Text textAlign="right">
+                          <Icon
+                            as={FontAwesome5}
+                            name="sign-in-alt"
+                            color="white"
+                            size="xs" />
+                        </Text>
+                      </Box>
+                      <Box justifyContent="center">
+                        <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
+                          Sign In
                     </Text>
-                  </Box>
-                  <Box justifyContent="center">
-                    <Text ml="2" fontSize="sm" textAlign="left" fontWeight="medium" color="white">
-                      Sign In
-                    </Text>
-                  </Box>
-                </>)
-              }
-            </HStack>
-          </Button>
-          <HStack mt="2" justifyContent="center">
-            <Text
-              fontSize="sm"
-              color="coolGray.600"
-              _dark={{
-                color: "warmGray.200",
-              }}
-            >
-              or{" "}
-            </Text>
-            <Link
-              _text={{
-                color: "brandPrimary.regular",
-                fontWeight: "medium",
-                fontSize: "sm",
-              }}
-              onPress={moveCreateAccount}
+                      </Box>
+                    </>)
+                }
+              </HStack>
+            </Button>
+            <HStack mt="2" justifyContent="center">
+              <Text
+                fontSize="sm"
+                color="coolGray.600"
+                _dark={{
+                  color: "warmGray.200",
+                }}
               >
-              Create an account
+                or{" "}
+              </Text>
+              <Link
+                _text={{
+                  color: "brandPrimary.regular",
+                  fontWeight: "medium",
+                  fontSize: "sm",
+                }}
+                onPress={moveCreateAccount}
+              >
+                Create an account
             </Link>
-          </HStack>
+            </HStack>
           </Box>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </NativeBaseProvider>
   );
 }
-
+//export necessary information and packages for use on later pages
 export default Login;
 export { username };
 export { username_stylized };
