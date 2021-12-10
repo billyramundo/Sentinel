@@ -1,6 +1,7 @@
 ## Overall Architecture Design
 ![image info](./architecture_diagram.jpg)
-Justification
+Justification:
+Our architecture is very simple and intiutive for connecting a mobile app to a piece of hardware. The backend that is run on the door ensures the security of our system, as it verifies any request sent in the database and only accepts requests from those who have access to the door.
 
 ## Database Structure
 #### Justification for Firebase rules
