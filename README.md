@@ -10,4 +10,4 @@ Introducing Sentinel: Our goal is to allow students to control their door from a
 - Firebase JavaScript v8.2.3
 
 ## Instructions For Deployment
-For the front end, one would need to set up node, npm, and expo (detailed instructions for this in installation instructions). Then, you would need to create a Firebase realtime database and use the database's config to connect it to the front end. **insert hardware instructions**
+For the front end, one would need to set up node, npm, and expo (detailed instructions for this in installation instructions). Then, you would need to create a Firebase realtime database and place the database's config in the code in order to connect it to the front end. **insert hardware instructions**
